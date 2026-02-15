@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的知识库</title>
+
+    <!-- 这里开始是 CSS 样式 -->
+    <style>
+    /* 整体页面样式 - 苹果风格 */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f5f5f7;  /* 苹果官网的浅灰背景 */
+        margin: 0;
+        padding: 40px 20px;
+        min-height: 100vh;
+    }
+    
+    /* 容器 - 让内容居中 */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    /* 主标题样式 - 苹果风格 */
+    h1 {
+        color: #1d1d1f;  /* 苹果深灰色 */
+        text-align: center;
+        font-size: 56px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+    
+    /* 段落样式 */
+    p {
+        color: #6e6e73;  /* 苹果中灰色 */
+        text-align: center;
+        font-size: 21px;
+        line-height: 1.4;
+    }
+    
+    /* 二级标题样式 */
+    h2 {
+        color: #1d1d1f;
+        margin-top: 60px;
+        margin-bottom: 20px;
+        font-size: 32px;
+        font-weight: 600;
+    }
+    
+    /* 输入框样式 - 苹果风格 */
+    input {
+        width: 100%;
+        padding: 16px;
+        margin: 12px 0;
+        border: 1px solid #d2d2d7;
+        border-radius: 12px;
+        font-size: 17px;
+        box-sizing: border-box;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
+    
+    /* 输入框聚焦效果 */
+    input:focus {
+        outline: none;
+        border-color: #0071e3;  /* 苹果蓝 */
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+    
+    /* 按钮样式 - 苹果蓝 */
+    button {
+        width: 100%;
+        padding: 16px;
+        margin: 20px 0;
+        background-color: #0071e3;  /* 经典苹果蓝 */
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 17px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    /* 按钮悬停效果 */
+    button:hover {
+        background-color: #0077ED;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    }
+    
+    /* 按钮点击效果 */
+    button:active {
+        transform: translateY(0);
+    }
+    
+    /* 链接列表区域 - 白色卡片 */
+    #linkList {
+        background-color: white;
+        padding: 32px;
+        border-radius: 16px;
+        margin-top: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        color: #1d1d1f;
+    }
+
+    /* 标签按钮样式 */
+    .tag-btn {
+        padding: 8px 16px;
+        background-color: white;
+        color: #1d1d1f;
+        border: 2px solid #d2d2d7;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: normal;
+    }
+    
+    .tag-btn:hover {
+        border-color: #0071e3;
+        color: #0071e3;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .tag-btn.selected {
+        background-color: #0071e3;
+        color: white;
+        border-color: #0071e3;
+    }
+    
+    /* 卡片中的标签样式 */
+    .card-tag {
+        display: inline-block;
+        padding: 4px 12px;
+        background-color: #e3f2fd;
+        color: #0071e3;
+        border-radius: 12px;
+        font-size: 13px;
+        margin-right: 6px;
+        margin-top: 8px;
+    }
+    /* 卡片悬停效果 */
+    .link-card {
+        background-color: #f9f9f9;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 12px;
+        border-left: 4px solid #0071e3;
+        transition: all 0.3s ease;
+    }
+    
+    .link-card:hover {
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    /* 页面加载动画 */
+    body {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    </style>
+</head>
+<body>
+    <h1>超级大脑 🚀</h1>
+    
+    <p>欢迎使用我的链接收藏工具！在这里整理你的知识。</p>
+    
+    <h2>添加新链接</h2>
+    
+    <div>
+        <input type="text" id="linkUrl" placeholder="输入网页链接（如：https://example.com）">
+        <input type="text" id="linkTitle" placeholder="输入链接标题">
+        <input type="text" id="linkNote" placeholder="智能笔记">
+
+        <!-- 标签选择器 -->
+        <div style="margin: 12px 0;">
+            <label style="color: #1d1d1f; font-size: 16px; display: block; margin-bottom: 8px;">
+                🏷️ 选择标签（可选）：
+            </label>
+            <div id="tagButtons" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button type="button" class="tag-btn" data-tag="编程">编程</button>
+                <button type="button" class="tag-btn" data-tag="设计">设计</button>
+                <button type="button" class="tag-btn" data-tag="AI">AI</button>
+                <button type="button" class="tag-btn" data-tag="学习">学习</button>
+                <button type="button" class="tag-btn" data-tag="工作">工作</button>
+                <button type="button" class="tag-btn" data-tag="工具">工具</button>
+                <button type="button" class="tag-btn" data-tag="其他">其他</button>
+            </div>
+        </div>
+
+        <button id="addButton">+ ✨ 立即收藏</button>
+    </div>
+    
+     <h2>我的收藏 📚 <span id="linkCount" style="color: #0071e3; font-size: 24px;"></span></h2>
+    
+    <!-- 搜索框 -->
+    <div style="margin: 20px 0;">
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="🔍 搜索链接（标题、URL、笔记...）"
+            style="margin: 0;"
+        >
+    </div>
+    
+    <div id="linkList">
+        <p>还没有收藏任何链接，点击上方按钮开始吧！</p>
+    </div>
+
+    <script>
+        // 1. 找到所有需要的元素
+        const addButton = document.getElementById('addButton');
+        const linkUrlInput = document.getElementById('linkUrl');
+        const linkTitleInput = document.getElementById('linkTitle');
+        const linkNoteInput = document.getElementById('linkNote');
+        const linkList = document.getElementById('linkList');
+        const searchInput = document.getElementById('searchInput');
+        const tagButtons = document.querySelectorAll('.tag-btn');
+        let selectedTag = '';  // 存储当前选中的标签
+        const linkCountSpan = document.getElementById('linkCount');
+        
+        // 2. 从 localStorage 读取已保存的链接（如果有的话）
+        let links = [];  // 创建一个空数组来存储所有链接
+        
+        // 尝试从 localStorage 读取
+        const savedLinks = localStorage.getItem('myLinks');
+        if (savedLinks) {
+            links = JSON.parse(savedLinks);  // 把字符串转换回数组
+            displayLinks();  // 显示所有链接
+        }
+        
+        // 3. 标签按钮点击事件
+    tagButtons.forEach(function(button) {
+        button.onclick = function() {
+            // 移除所有按钮的选中状态
+            tagButtons.forEach(function(btn) {
+                btn.classList.remove('selected');
+            });
+            
+            // 切换当前按钮的选中状态
+            if (selectedTag === this.dataset.tag) {
+                // 如果点击的是已选中的标签，取消选中
+                selectedTag = '';
+            } else {
+                // 选中新标签
+                selectedTag = this.dataset.tag;
+                this.classList.add('selected');
+            }
+            
+            console.log('选中的标签：', selectedTag);
+        };
+    });
+        
+        addButton.onclick = function() {
+            // 获取用户输入的内容
+            const url = linkUrlInput.value;
+            const title = linkTitleInput.value;
+            const note = linkNoteInput.value;
+            
+            // 检查链接是否为空
+            if (url === '' || title === '') {
+                alert('请至少填写链接和标题！');
+                return;
+            }
+            
+            // 创建一个链接对象
+            const newLink = {
+                url: url,
+                title: title,
+                note: note,
+                tag: selectedTag,  // 添加标签
+                time: new Date().toLocaleString()  // 添加时间戳
+            };
+            
+            // 把新链接添加到数组开头
+            links.unshift(newLink);
+            
+            // 保存到 localStorage
+            localStorage.setItem('myLinks', JSON.stringify(links));
+            
+            // 显示所有链接
+            displayLinks();
+            
+            // 清空输入框
+            linkUrlInput.value = '';
+            linkTitleInput.value = '';
+            linkNoteInput.value = '';
+
+            // 清空选中的标签
+            selectedTag = '';
+            tagButtons.forEach(function(btn) {
+                btn.classList.remove('selected');
+            });
+            
+            console.log('链接已保存到 localStorage！');
+        };
+        
+        // 4. 显示所有链接的函数
+        function displayLinks() {
+            // 更新统计信息
+            linkCountSpan.textContent = `(共 ${links.length} 个)`;
+            
+            if (links.length === 0) {
+                linkCountSpan.textContent = '';
+                linkList.innerHTML =`
+                    <div style="text-align: center; padding: 60px 20px; color: #6e6e73;">
+                        <p style="font-size: 64px; margin: 0;">📚</p>
+                        <p style="font-size: 20px; margin: 20px 0 10px 0; color: #1d1d1f;">还没有任何收藏</p>
+                        <p style="font-size: 16px; margin: 0;">点击上方按钮，开始整理你的知识库吧！</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < links.length; i++) {
+                const link = links[i];
+
+                // 标签显示
+                const tagHTML = link.tag ? `<span class="card-tag">🏷️ ${link.tag}</span>` : '';
+
+                html += `
+                    <div class="link-card">
+                    
+                        <h3 style="margin: 0 0 10px 0; color: #1d1d1f;">
+                            📎 ${link.title}
+                        </h3>
+                        <p style="margin: 5px 0; color: #0071e3; word-break: break-all;">
+                            🔗 <a href="${link.url}" target="_blank" style="color: #0071e3; text-decoration: none;">${link.url}</a>
+                        </p>
+                        <p style="margin: 10px 0 0 0; color: #6e6e73;">
+                            📝 ${link.note || '（无笔记）'}
+                        </p>
+                        ${tagHTML}
+                        <p style="margin: 10px 0 0 0; color: #999; font-size: 14px;">
+                            🕒 ${link.time}
+                        </p>
+                         <button 
+                            onclick="editLink(${i})" 
+                            style="
+                                width: auto;
+                                padding: 8px 16px;
+                                margin: 15px 5px 0 0;
+                                background-color: #0071e3;
+                                font-size: 14px;
+                            ">
+                            ✏️ 编辑
+                        </button>
+                        <button 
+                            onclick="deleteLink(${i})" 
+                            style="
+                                width: auto;
+                                padding: 8px 16px;
+                                margin: 15px 5px 0 0;
+                                background-color: #ff3b30;
+                                font-size: 14px;
+                            ">
+                            🗑️ 删除
+                        </button>      
+                    </div>
+                `;
+            }
+            linkList.innerHTML = html;
+        }
+        
+        // 5. 搜索功能
+        searchInput.oninput = function() {
+            const keyword = searchInput.value.toLowerCase();  // 转小写，不区分大小写
+            
+            if (keyword === '') {
+                // 如果搜索框为空，显示所有链接
+                displayLinks();
+                return;
+            }
+            
+            // 过滤出匹配的链接
+            const filteredLinks = links.filter(function(link) {
+                const titleMatch = link.title.toLowerCase().includes(keyword);
+                const urlMatch = link.url.toLowerCase().includes(keyword);
+                const noteMatch = link.note.toLowerCase().includes(keyword);
+                
+                return titleMatch || urlMatch || noteMatch;
+            });
+            
+            // 显示过滤后的结果
+            displayFilteredLinks(filteredLinks, keyword);
+        };
+        
+        // 6. 显示过滤后的链接
+        function displayFilteredLinks(filteredLinks, keyword) {
+            // 更新统计信息（搜索结果数量）
+            linkCountSpan.textContent = `(共 ${links.length} 个，找到 ${filteredLinks.length} 个)`;
+            
+            if (filteredLinks.length === 0) {
+                linkList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6e6e73;">
+                        <p style="font-size: 48px; margin: 0;">🔍</p>
+                        <p style="font-size: 18px;">没有找到包含 "${keyword}" 的链接</p>
+                        <p style="font-size: 14px;">试试其他关键词吧～</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < filteredLinks.length; i++) {
+                const link = filteredLinks[i];
+                
+                // 高亮显示匹配的关键词
+                const highlightedTitle = highlightKeyword(link.title, keyword);
+                const highlightedUrl = highlightKeyword(link.url, keyword);
+                const highlightedNote = highlightKeyword(link.note, keyword);
+
+                // 标签显示
+                const tagHTML = link.tag ? `<span class="card-tag">🏷️ ${link.tag}</span>` : '';
+                
+                html += `
+                    <div class="link-card">
+                    
+                        <h3 style="margin: 0 0 10px 0; color: #1d1d1f;">
+                            📎 ${highlightedTitle}
+                        </h3>
+                        <p style="margin: 5px 0; color: #0071e3; word-break: break-all;">
+                            🔗 <a href="${link.url}" target="_blank" style="color: #0071e3; text-decoration: none;">${highlightedUrl}</a>
+                        </p>
+                        <p style="margin: 10px 0 0 0; color: #6e6e73;">
+                            📝 ${highlightedNote || '（无笔记）'}
+                        </p>
+                        ${tagHTML}
+                        <p style="margin: 10px 0 0 0; color: #999; font-size: 14px;">
+                            🕒 ${link.time}
+                        </p>
+                        <button 
+                            onclick="editLink(${links.indexOf(link)})" 
+                            style="
+                                width: auto;
+                                padding: 8px 16px;
+                                margin: 15px 5px 0 0;
+                                background-color: #0071e3;
+                                font-size: 14px;
+                            ">
+                            ✏️ 编辑
+                        </button>
+                        <button 
+                            onclick="deleteLink(${links.indexOf(link)})" 
+                            style="
+                                width: auto;
+                                padding: 8px 16px;
+                                margin: 15px 5px 0 0;
+                                background-color: #ff3b30;
+                                font-size: 14px;
+                            ">
+                            🗑️ 删除
+                        </button>
+                    </div>
+                `;
+            }
+            linkList.innerHTML = html;
+        }
+        
+        // 7. 高亮关键词
+        function highlightKeyword(text, keyword) {
+            if (!text || !keyword) return text;
+            
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<span style="background-color: #fff59d; padding: 2px 4px; border-radius: 3px;">$1</span>');
+        }
+
+        // 8. 删除链接
+        function deleteLink(index) {
+            // 确认对话框
+            const link = links[index];
+            const confirmDelete = confirm(`确定要删除这个链接吗？\n\n标题：${link.title}\nURL：${link.url}`);
+            
+            if (confirmDelete) {
+                // 从数组中删除
+                links.splice(index, 1);
+                
+                // 保存到 localStorage
+                localStorage.setItem('myLinks', JSON.stringify(links));
+                
+                // 重新显示
+                displayLinks();
+                
+                console.log('链接已删除！');
+            }
+        }
+        // 9. 编辑链接
+        function editLink(index) {
+            const link = links[index];
+            
+            // 将要编辑的内容填充到输入框
+            linkUrlInput.value = link.url;
+            linkTitleInput.value = link.title;
+            linkNoteInput.value = link.note;
+            
+            // 如果有标签，选中对应的标签按钮
+            if (link.tag) {
+                selectedTag = link.tag;
+                tagButtons.forEach(function(btn) {
+                    if (btn.dataset.tag === link.tag) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+            }
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // 删除旧的链接
+            links.splice(index, 1);
+            localStorage.setItem('myLinks', JSON.stringify(links));
+            displayLinks();
+            
+            // 提示用户
+            alert('内容已填充到输入框，修改后点击"保存链接"即可完成编辑！');
+            
+            console.log('开始编辑链接：', link.title);
+        }
+        console.log("JavaScript 加载完成！已加载 " + links.length + " 个链接");
+    </script>
+</body>
+</html>

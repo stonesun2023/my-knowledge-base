@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>超级大脑</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- 链接预览优化模块 -->
+    <script src="link-preview.js" defer></script>
     <style>
         /* ==========================================
            CSS 变量定义（浅色模式）
@@ -119,6 +123,69 @@
 
         #themeToggle:active {
             transform: scale(0.95);
+        }
+
+        /* ==========================================
+           返回顶部按钮
+        ========================================== */
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #333;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            /* 显示/隐藏动画：200ms */
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            z-index: 9999;
+            /* 初始隐藏 */
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+        }
+
+        /* 深色模式 */
+        body.dark-mode #backToTop {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 显示状态 */
+        #backToTop.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* 悬停：放大 1.1 倍 */
+        #backToTop:hover {
+            transform: scale(1.1);
+        }
+
+        /* 点击反馈 */
+        #backToTop:active {
+            transform: scale(0.95);
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            #backToTop {
+                bottom: 80px; /* 避免遮挡移动端导航栏 */
+                right: 16px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
         }
 
         /* ==========================================
@@ -424,6 +491,731 @@
         }
 
         /* ==========================================
+           数据统计面板
+        ========================================== */
+        #statsPanel {
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            margin-top: 20px;
+            box-shadow: 0 4px 16px var(--shadow-light);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 28px;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .stats-header:hover {
+            background-color: var(--bg-card);
+        }
+
+        .stats-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .stats-header-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .stats-toggle-icon {
+            font-size: 18px;
+            color: var(--text-secondary);
+            transition: transform 0.3s ease, color 0.3s ease;
+            line-height: 1;
+        }
+
+        .stats-toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .stats-body {
+            padding: 24px 28px;
+            transition: all 0.35s ease;
+            overflow: hidden;
+        }
+
+        .stats-body.collapsed {
+            display: none;
+        }
+
+        /* 四格概览卡片 */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 18px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .stat-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-medium);
+        }
+
+        .stat-card-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-color);
+            line-height: 1.1;
+            margin-bottom: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .stat-card-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        /* 图表区域 */
+        .stats-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+        }
+
+        .chart-canvas-wrap {
+            position: relative;
+            height: 200px;
+        }
+
+        /* 最常用标签 */
+        .stats-top-tags {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .top-tags-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+        }
+
+        .top-tags-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .top-tag-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-tag-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .top-tag-rank.rank-1 { background: #ffd700; color: #333; }
+        .top-tag-rank.rank-2 { background: #c0c0c0; color: #333; }
+        .top-tag-rank.rank-3 { background: #cd7f32; color: white; }
+
+        .top-tag-name {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+            min-width: 60px;
+            transition: color 0.3s ease;
+        }
+
+        .top-tag-bar-wrap {
+            flex: 1;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .top-tag-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            transition: width 0.6s ease, background 0.3s ease;
+        }
+
+        .top-tag-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            min-width: 30px;
+            text-align: right;
+            transition: color 0.3s ease;
+        }
+
+        /* 无数据提示 */
+        .stats-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .stats-empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* ==========================================
+           链接预览浮层
+        ========================================== */
+        #linkPreview {
+            position: fixed;
+            width: 320px;
+            max-height: 400px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            z-index: 8000;
+            overflow: hidden;
+            pointer-events: auto;
+            /* 初始隐藏 */
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            /* 防止文字选中 */
+            user-select: none;
+            /* GPU 加速提示 */
+            will-change: opacity, transform;
+        }
+
+        body.dark-mode #linkPreview {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        #linkPreview.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #linkPreview.hiding {
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.15s ease-in, transform 0.15s ease-in;
+        }
+
+        /* Loading 状态 */
+        .lp-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .lp-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: lp-spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes lp-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 内容区域 */
+        .lp-content { display: none; }
+
+        .lp-image-wrap {
+            width: 100%;
+            height: 140px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            background: var(--bg-card);
+        }
+
+        .lp-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .lp-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .lp-favicon {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .lp-favicon-fallback {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            background: var(--accent-color);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .lp-domain {
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lp-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lp-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 降级内容 */
+        .lp-fallback { display: none; }
+
+        .lp-fallback-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .lp-fallback-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lp-fallback-domain {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 移动端：底部固定 + 遮罩 */
+        #lpOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 7999;
+        }
+
+        #lpOverlay.visible { display: block; }
+
+        @media (max-width: 768px) {
+            #linkPreview {
+                width: calc(100vw - 40px);
+                left: 20px !important;
+                right: 20px !important;
+                bottom: 20px !important;
+                top: auto !important;
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+
+            .lp-close-btn {
+                display: flex !important;
+            }
+        }
+
+        .lp-close-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            z-index: 1;
+        }
+
+        .lp-close-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        /* ==========================================
+           键盘快捷键提示栏
+        ========================================== */
+        #shortcutBar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            z-index: 900;
+            transition: all 0.3s ease;
+            box-shadow: 0 -2px 12px var(--shadow-light);
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .shortcut-item:hover {
+            color: var(--text-primary);
+        }
+
+        .kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 7px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+            color: var(--text-primary);
+            font-weight: 500;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+            min-width: 22px;
+        }
+
+        .shortcut-desc {
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        /* 为底部提示栏留出空间 */
+        body {
+            padding-bottom: 56px;
+        }
+
+        /* ==========================================
+           批量操作 - 复选框
+        ========================================== */
+        .link-card {
+            position: relative; /* 为复选框绝对定位提供基准 */
+        }
+
+        .card-checkbox {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.2s ease;
+            opacity: 0;
+            z-index: 10;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        /* 选择模式下或 hover 时显示复选框 */
+        body.selection-mode .card-checkbox,
+        .link-card:hover .card-checkbox {
+            opacity: 1;
+        }
+
+        .card-checkbox:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .card-checkbox.checked {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            opacity: 1;
+        }
+
+        /* 选中状态的卡片 */
+        .link-card.selected {
+            border-left: 4px solid var(--accent-color);
+            background: var(--tag-bg);
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        body.dark-mode .link-card.selected {
+            background: rgba(10, 132, 255, 0.12);
+        }
+
+        /* 选择模式下卡片内容左移，为复选框留空间 */
+        body.selection-mode .link-card .card-content {
+            padding-left: 32px;
+        }
+
+        /* ==========================================
+           批量操作 - 操作栏
+        ========================================== */
+        #batchBar {
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0 16px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px var(--shadow-medium);
+            margin-bottom: 16px;
+            /* 初始隐藏，从上方滑入 */
+            opacity: 0;
+            transform: translateY(-12px);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #batchBar.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .batch-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-color);
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .batch-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .batch-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .batch-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .batch-btn.danger:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+            background: rgba(255, 59, 48, 0.06);
+        }
+
+        .batch-btn.cancel {
+            margin-left: auto;
+            color: var(--text-secondary);
+        }
+
+        .batch-btn.cancel:hover {
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        /* 标签下拉菜单 */
+        .batch-tag-dropdown {
+            position: relative;
+        }
+
+        .batch-tag-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px var(--shadow-medium);
+            padding: 6px;
+            min-width: 140px;
+            z-index: 600;
+            display: none;
+        }
+
+        .batch-tag-menu.open { display: block; }
+
+        .batch-tag-menu-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .batch-tag-menu-item:hover {
+            background: var(--bg-card);
+            color: var(--accent-color);
+        }
+
+        /* Toast 提示 */
+        #batchToast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(0, 0, 0, 0.82);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 9000;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        #batchToast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ==========================================
            响应式设计
         ========================================== */
         @media (max-width: 768px) {
@@ -442,12 +1234,90 @@
                 height: 45px;
                 font-size: 20px;
             }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-charts {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-body {
+                padding: 16px;
+            }
+
+            .stats-header {
+                padding: 16px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- 主题切换按钮 -->
     <button id="themeToggle" title="切换主题">🌙</button>
+
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" title="返回顶部">⬆️</button>
+
+    <!-- 链接预览浮层（全局唯一，复用） -->
+    <div id="lpOverlay"></div>
+    <div id="linkPreview">
+        <!-- 移动端关闭按钮 -->
+        <button class="lp-close-btn" id="lpCloseBtn" onclick="lpHide()">✕</button>
+
+        <!-- Loading 状态 -->
+        <div class="lp-loading" id="lpLoading">
+            <div class="lp-spinner"></div>
+            <span>加载预览中...</span>
+        </div>
+
+        <!-- 成功内容 -->
+        <div class="lp-content" id="lpContent">
+            <div class="lp-image-wrap" id="lpImageWrap" style="display:none">
+                <img class="lp-image" id="lpImage" src="" alt="preview" onerror="this.parentElement.style.display='none'">
+            </div>
+            <div class="lp-header">
+                <img class="lp-favicon" id="lpFavicon" src="" alt="favicon" onerror="this.style.display='none'; document.getElementById('lpFaviconFallback').style.display='flex'">
+                <div class="lp-favicon-fallback" id="lpFaviconFallback" style="display:none">?</div>
+                <div class="lp-domain" id="lpDomain"></div>
+            </div>
+            <div class="lp-title" id="lpTitle"></div>
+            <div class="lp-description" id="lpDesc"></div>
+        </div>
+
+        <!-- 降级内容（API 失败时显示） -->
+        <div class="lp-fallback" id="lpFallback">
+            <div class="lp-fallback-icon">🔗</div>
+            <div class="lp-fallback-title" id="lpFallbackTitle"></div>
+            <div class="lp-fallback-domain" id="lpFallbackDomain"></div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="batchToast"></div>
+
+    <!-- 键盘快捷键提示栏 -->
+    <div id="shortcutBar">
+        <div class="shortcut-item">
+            <kbd class="kbd" id="kbdModK"></kbd>
+            <kbd class="kbd">K</kbd>
+            <span class="shortcut-desc">添加链接</span>
+        </div>
+        <div class="shortcut-item">
+            <kbd class="kbd" id="kbdModF"></kbd>
+            <kbd class="kbd">F</kbd>
+            <span class="shortcut-desc">搜索</span>
+        </div>
+        <div class="shortcut-item">
+            <kbd class="kbd">/</kbd>
+            <span class="shortcut-desc">搜索</span>
+        </div>
+        <div class="shortcut-item">
+            <kbd class="kbd">ESC</kbd>
+            <span class="shortcut-desc">清空 / 失焦</span>
+        </div>
+    </div>
 
     <div class="container">
         <h1>超级大脑 🚀</h1>
@@ -480,6 +1350,67 @@
             <span id="countLabel" style="color: var(--accent-color); font-size: 24px; font-weight: 400;"></span>
         </h2>
 
+        <!-- 数据统计面板 -->
+        <div id="statsPanel">
+            <div class="stats-header" id="statsHeader">
+                <div class="stats-header-left">
+                    <span style="font-size:22px;">📊</span>
+                    <div>
+                        <div class="stats-header-title">数据统计</div>
+                        <div class="stats-header-subtitle" id="statsSubtitle">加载中...</div>
+                    </div>
+                </div>
+                <span class="stats-toggle-icon" id="statsToggleIcon">▼</span>
+            </div>
+            <div class="stats-body" id="statsBody">
+                <!-- 概览卡片 -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-card-icon">🔗</div>
+                        <div class="stat-card-value" id="statTotalLinks">0</div>
+                        <div class="stat-card-label">总链接数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon">🏷️</div>
+                        <div class="stat-card-value" id="statTotalTags">0</div>
+                        <div class="stat-card-label">标签种类</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon">📅</div>
+                        <div class="stat-card-value" id="statRecentLinks">0</div>
+                        <div class="stat-card-label">近7天新增</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon">⭐</div>
+                        <div class="stat-card-value" id="statTopTag">—</div>
+                        <div class="stat-card-label">最常用标签</div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="stats-charts" id="statsCharts">
+                    <div class="chart-container">
+                        <div class="chart-title">🥧 标签分布</div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="tagPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">📈 近7天趋势</div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="weekBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最常用标签排行 -->
+                <div class="stats-top-tags">
+                    <div class="top-tags-title">🏆 标签排行榜</div>
+                    <div class="top-tags-list" id="topTagsList"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- 工具栏 -->
         <div style="
             display: flex;
@@ -507,6 +1438,16 @@
             ">
                 📥 导入数据
             </button>
+            <button class="save-btn" id="clearPreviewCacheBtn" style="
+                flex: 1;
+                min-width: 140px;
+                background-color: #8e8e93;
+                margin: 0;
+                padding: 12px 20px;
+                font-size: 15px;
+            ">
+                🗑️ 清除预览缓存
+            </button>
         </div>
         <input type="file" id="importFile" accept=".json" style="display: none;">
 
@@ -515,6 +1456,34 @@
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="🔍 搜索链接（标题、URL、笔记...）">
             </div>
+
+            <!-- 批量操作栏（选中链接时显示） -->
+            <div id="batchBar">
+                <span class="batch-count" id="batchCount">已选 0 个</span>
+                <div class="batch-divider"></div>
+
+                <!-- 修改标签下拉 -->
+                <div class="batch-tag-dropdown">
+                    <button class="batch-btn" id="batchTagBtn" onclick="toggleBatchTagMenu()">
+                        🏷️ 修改标签 ▾
+                    </button>
+                    <div class="batch-tag-menu" id="batchTagMenu">
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('编程')">💻 编程</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('设计')">🎨 设计</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('AI')">🤖 AI</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('学习')">📖 学习</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('工作')">💼 工作</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('工具')">🔧 工具</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('其他')">📌 其他</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('')" style="color:var(--text-secondary)">✕ 清除标签</div>
+                    </div>
+                </div>
+
+                <button class="batch-btn" onclick="batchExport()">📤 导出</button>
+                <button class="batch-btn danger" onclick="batchDelete()">🗑️ 删除</button>
+                <button class="batch-btn cancel" onclick="exitSelectionMode()">✕ 取消选择</button>
+            </div>
+
             <div id="linkList"></div>
         </div>
     </div>
@@ -550,6 +1519,19 @@
         let selectedAddTag = '';
         let activeFilter = '全部';
         let searchKeyword = '';
+
+        // ==========================================
+        // 统计面板状态（提前声明，避免 renderAll 调用时未定义）
+        // ==========================================
+        let tagPieChartInstance = null;
+        let weekBarChartInstance = null;
+        let statsCollapsed = false;
+
+        const CHART_COLORS = [
+            '#0071e3', '#34c759', '#ff9500', '#ff3b30',
+            '#af52de', '#5ac8fa', '#ffcc00', '#ff6b6b',
+            '#4ecdc4', '#a8e6cf'
+        ];
 
         // ==========================================
         // 获取 DOM 元素
@@ -639,6 +1621,10 @@
         function renderAll() {
             renderFilterBar();
             renderLinkList();
+            // 同步刷新统计面板（statsCollapsed 在统计面板初始化后才有值，做兼容处理）
+            if (typeof statsCollapsed !== 'undefined' && !statsCollapsed) {
+                renderStats();
+            }
         }
 
         // ==========================================
@@ -750,6 +1736,11 @@
             });
 
             linkList.innerHTML = html;
+
+            // 通知链接预览模块重新绑定预加载观察器
+            if (window.LinkPreview) {
+                window.LinkPreview.rebindPreloader();
+            }
         }
 
         // ==========================================
@@ -913,10 +1904,819 @@
         };
 
         // ==========================================
+        // 清除预览缓存按钮
+        // ==========================================
+        document.getElementById('clearPreviewCacheBtn').onclick = function() {
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('lp2_'));
+            if (keys.length === 0) {
+                alert('✅ 预览缓存已经是空的，无需清除。');
+                return;
+            }
+            keys.forEach(k => localStorage.removeItem(k));
+            // 同时清除内存缓存
+            if (window.LinkPreview && window.LinkPreview.LRUCache) {
+                window.LinkPreview.LRUCache._mem.clear();
+                window.LinkPreview.LRUCache._meta = [];
+            }
+            alert(`✅ 已清除 ${keys.length} 条预览缓存！\n\n重新悬停链接卡片，将使用新逻辑获取正确的缩略图。`);
+        };
+
+        // ==========================================
+        // 返回顶部（使用 Intersection Observer 优化性能）
+        // ==========================================
+        const backToTop = document.getElementById('backToTop');
+
+        // 创建一个 500px 高的哨兵元素放在页面顶部
+        const scrollSentinel = document.createElement('div');
+        scrollSentinel.style.cssText = 'position:absolute;top:500px;left:0;width:1px;height:1px;pointer-events:none;';
+        document.body.appendChild(scrollSentinel);
+
+        // Intersection Observer：哨兵离开视口 → 显示按钮；进入视口 → 隐藏按钮
+        const backToTopObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    // 哨兵可见 = 滚动位置 < 500px → 隐藏按钮
+                    backToTop.classList.remove('visible');
+                } else {
+                    // 哨兵不可见 = 滚动位置 > 500px → 显示按钮
+                    backToTop.classList.add('visible');
+                }
+            });
+        }, { threshold: 0 });
+
+        backToTopObserver.observe(scrollSentinel);
+
+        // 点击按钮：500ms ease-out 平滑滚动到顶部
+        backToTop.onclick = function() {
+            // 优先使用原生 smooth（现代浏览器），降级使用 JS 动画
+            if ('scrollBehavior' in document.documentElement.style) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // 降级：手动实现 500ms ease-out 动画
+                const startY = window.scrollY;
+                const startTime = performance.now();
+                const duration = 500;
+
+                function easeOut(t) {
+                    return 1 - Math.pow(1 - t, 3); // cubic ease-out
+                }
+
+                function step(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    window.scrollTo(0, startY * (1 - easeOut(progress)));
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+        };
+
+        // ==========================================
         // 初始化
         // ==========================================
         renderAll();
         console.log(`🚀 超级大脑已加载！共 ${links.length} 个链接`);
+
+        // ==========================================
+        // 折叠/展开统计面板
+        // ==========================================
+        document.getElementById('statsHeader').onclick = function() {
+            statsCollapsed = !statsCollapsed;
+            const statsBody = document.getElementById('statsBody');
+            const toggleIcon = document.getElementById('statsToggleIcon');
+            if (statsCollapsed) {
+                statsBody.classList.add('collapsed');
+                toggleIcon.classList.add('collapsed');
+            } else {
+                statsBody.classList.remove('collapsed');
+                toggleIcon.classList.remove('collapsed');
+                // 展开时重新渲染图表（避免尺寸问题）
+                setTimeout(renderStats, 50);
+            }
+        };
+
+        // ==========================================
+        // 计算统计数据
+        // ==========================================
+        function calcStats() {
+            // 总链接数
+            const totalLinks = links.length;
+
+            // 各标签数量
+            const tagMap = {};
+            links.forEach(function(link) {
+                const tag = link.tag || '未分类';
+                tagMap[tag] = (tagMap[tag] || 0) + 1;
+            });
+
+            // 标签种类数（不含"未分类"）
+            const taggedCount = Object.keys(tagMap).filter(t => t !== '未分类').length;
+
+            // 最近7天新增
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const recentLinks = links.filter(function(link) {
+                if (!link.time) return false;
+                // 尝试解析时间字符串
+                const t = new Date(link.time);
+                if (isNaN(t.getTime())) {
+                    // 兼容中文格式 "2026/2/18 17:30:00"
+                    const cleaned = link.time.replace(/\//g, '-');
+                    const t2 = new Date(cleaned);
+                    return !isNaN(t2.getTime()) && t2 >= sevenDaysAgo;
+                }
+                return t >= sevenDaysAgo;
+            }).length;
+
+            // 最常用标签（排除"未分类"）
+            const sortedTags = Object.entries(tagMap)
+                .filter(([tag]) => tag !== '未分类')
+                .sort((a, b) => b[1] - a[1]);
+            const topTag = sortedTags.length > 0 ? sortedTags[0][0] : '—';
+
+            // 近7天每天数量（用于折线/柱状图）
+            const weekDays = [];
+            const weekCounts = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                const label = `${d.getMonth() + 1}/${d.getDate()}`;
+                weekDays.push(label);
+                const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+                const count = links.filter(function(link) {
+                    if (!link.time) return false;
+                    let t = new Date(link.time);
+                    if (isNaN(t.getTime())) {
+                        t = new Date(link.time.replace(/\//g, '-'));
+                    }
+                    return !isNaN(t.getTime()) && t >= dayStart && t < dayEnd;
+                }).length;
+                weekCounts.push(count);
+            }
+
+            return { totalLinks, tagMap, taggedCount, recentLinks, topTag, sortedTags, weekDays, weekCounts };
+        }
+
+        // ==========================================
+        // 获取当前主题颜色（用于 Chart.js）
+        // ==========================================
+        function getThemeColors() {
+            const isDark = document.body.classList.contains('dark-mode');
+            return {
+                textColor: isDark ? '#f5f5f7' : '#1d1d1f',
+                secondaryColor: isDark ? '#b0b0b0' : '#6e6e73',
+                gridColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                bgColor: isDark ? '#2d2d2d' : '#f9f9f9',
+                accentColor: isDark ? '#0a84ff' : '#0071e3',
+            };
+        }
+
+        // ==========================================
+        // 渲染统计面板
+        // ==========================================
+        function renderStats() {
+            const stats = calcStats();
+            const theme = getThemeColors();
+
+            // 更新概览卡片
+            document.getElementById('statTotalLinks').textContent = stats.totalLinks;
+            document.getElementById('statTotalTags').textContent = stats.taggedCount;
+            document.getElementById('statRecentLinks').textContent = stats.recentLinks;
+
+            const topTagEl = document.getElementById('statTopTag');
+            if (stats.topTag === '—') {
+                topTagEl.textContent = '—';
+                topTagEl.style.fontSize = '28px';
+            } else {
+                // 标签名较长时缩小字体
+                topTagEl.textContent = stats.topTag;
+                topTagEl.style.fontSize = stats.topTag.length > 3 ? '18px' : '24px';
+            }
+
+            // 更新副标题
+            document.getElementById('statsSubtitle').textContent =
+                stats.totalLinks > 0
+                    ? `共 ${stats.totalLinks} 个链接 · ${stats.taggedCount} 种标签`
+                    : '暂无数据';
+
+            // 图表区域：无数据时显示提示
+            const chartsEl = document.getElementById('statsCharts');
+            if (stats.totalLinks === 0) {
+                chartsEl.innerHTML = `
+                    <div class="stats-empty" style="grid-column:1/-1">
+                        <div class="stats-empty-icon">📭</div>
+                        <div>还没有收藏任何链接，快去添加吧！</div>
+                    </div>`;
+                // 销毁旧图表
+                if (tagPieChartInstance) { tagPieChartInstance.destroy(); tagPieChartInstance = null; }
+                if (weekBarChartInstance) { weekBarChartInstance.destroy(); weekBarChartInstance = null; }
+            } else {
+                // 恢复图表 HTML（如果被替换过）
+                if (!document.getElementById('tagPieChart')) {
+                    chartsEl.innerHTML = `
+                        <div class="chart-container">
+                            <div class="chart-title">🥧 标签分布</div>
+                            <div class="chart-canvas-wrap"><canvas id="tagPieChart"></canvas></div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title">📈 近7天趋势</div>
+                            <div class="chart-canvas-wrap"><canvas id="weekBarChart"></canvas></div>
+                        </div>`;
+                }
+                renderPieChart(stats, theme);
+                renderBarChart(stats, theme);
+            }
+
+            // 渲染标签排行榜
+            renderTopTags(stats);
+        }
+
+        // ==========================================
+        // 饼图：标签分布
+        // ==========================================
+        function renderPieChart(stats, theme) {
+            if (tagPieChartInstance) {
+                tagPieChartInstance.destroy();
+                tagPieChartInstance = null;
+            }
+
+            const tagEntries = Object.entries(stats.tagMap).sort((a, b) => b[1] - a[1]);
+            const labels = tagEntries.map(([tag]) => tag);
+            const data = tagEntries.map(([, count]) => count);
+            const colors = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+
+            const ctx = document.getElementById('tagPieChart');
+            if (!ctx) return;
+
+            tagPieChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: theme.bgColor,
+                        borderWidth: 3,
+                        hoverOffset: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: theme.textColor,
+                                font: { size: 12, family: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+                                padding: 12,
+                                boxWidth: 12,
+                                boxHeight: 12,
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                                    return ` ${ctx.label}: ${ctx.parsed} 个 (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 柱状图：近7天趋势
+        // ==========================================
+        function renderBarChart(stats, theme) {
+            if (weekBarChartInstance) {
+                weekBarChartInstance.destroy();
+                weekBarChartInstance = null;
+            }
+
+            const ctx = document.getElementById('weekBarChart');
+            if (!ctx) return;
+
+            weekBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.weekDays,
+                    datasets: [{
+                        label: '新增链接',
+                        data: stats.weekCounts,
+                        backgroundColor: stats.weekCounts.map((v, i) =>
+                            i === stats.weekCounts.length - 1
+                                ? theme.accentColor
+                                : (theme.accentColor + '99')
+                        ),
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ` 新增 ${ctx.parsed.y} 个链接`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: theme.secondaryColor,
+                                font: { size: 11 }
+                            },
+                            grid: { display: false },
+                            border: { color: theme.gridColor }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: theme.secondaryColor,
+                                font: { size: 11 },
+                                stepSize: 1,
+                                precision: 0,
+                            },
+                            grid: { color: theme.gridColor },
+                            border: { color: 'transparent' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 标签排行榜
+        // ==========================================
+        function renderTopTags(stats) {
+            const topTagsList = document.getElementById('topTagsList');
+            if (stats.sortedTags.length === 0) {
+                topTagsList.innerHTML = `
+                    <div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 16px 0;">
+                        暂无标签数据
+                    </div>`;
+                return;
+            }
+
+            const maxCount = stats.sortedTags[0][1];
+            let html = '';
+            stats.sortedTags.slice(0, 5).forEach(function([tag, count], i) {
+                const rank = i + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const pct = Math.round((count / maxCount) * 100);
+                html += `
+                    <div class="top-tag-item">
+                        <div class="top-tag-rank ${rankClass}">${rank}</div>
+                        <div class="top-tag-name">🏷️ ${escapeHTML(tag)}</div>
+                        <div class="top-tag-bar-wrap">
+                            <div class="top-tag-bar" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="top-tag-count">${count}</div>
+                    </div>`;
+            });
+            topTagsList.innerHTML = html;
+        }
+
+        // ==========================================
+        // 主题切换时同步更新图表颜色
+        // ==========================================
+        const _origThemeToggle = themeToggle.onclick;
+        themeToggle.onclick = function() {
+            _origThemeToggle.call(this);
+            if (!statsCollapsed) {
+                setTimeout(renderStats, 50);
+            }
+        };
+
+        // ==========================================
+        // 初始化统计面板
+        // ==========================================
+        renderStats();
+
+        // ==========================================
+        // 键盘快捷键
+        // ==========================================
+
+        // 动态设置修饰键显示（Mac 显示 ⌘，Windows 显示 Ctrl）
+        (function() {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const modLabel = isMac ? '⌘' : 'Ctrl';
+            document.getElementById('kbdModK').textContent = modLabel;
+            document.getElementById('kbdModF').textContent = modLabel;
+        })();
+
+        // 视觉反馈：输入框闪烁动画
+        function flashElement(el) {
+            el.style.transition = 'box-shadow 0.1s ease';
+            el.style.boxShadow = '0 0 0 4px rgba(10, 132, 255, 0.5)';
+            setTimeout(function() {
+                el.style.boxShadow = '0 0 0 4px rgba(10, 132, 255, 0.1)';
+            }, 150);
+            setTimeout(function() {
+                el.style.boxShadow = '';
+                el.style.transition = '';
+            }, 400);
+        }
+
+        // 判断当前焦点是否在输入框中（避免快捷键干扰输入）
+        function isTyping() {
+            const tag = document.activeElement && document.activeElement.tagName;
+            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+        }
+
+        // 聚焦搜索框
+        function focusSearch() {
+            searchInput.focus();
+            searchInput.select();
+            flashElement(searchInput);
+            // 平滑滚动到搜索框位置
+            searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // 聚焦 URL 输入框
+        function focusUrlInput() {
+            // 折叠统计面板（如果展开）
+            if (!statsCollapsed) {
+                statsCollapsed = true;
+                document.getElementById('statsBody').classList.add('collapsed');
+                document.getElementById('statsToggleIcon').classList.add('collapsed');
+            }
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // 延迟聚焦（等待滚动）
+            setTimeout(function() {
+                inputUrl.focus();
+                flashElement(inputUrl);
+            }, 200);
+        }
+
+        // 清空搜索
+        function clearSearch() {
+            if (searchKeyword) {
+                searchInput.value = '';
+                searchKeyword = '';
+                renderLinkList();
+                flashElement(searchInput);
+            }
+            searchInput.blur();
+        }
+
+        // ==========================================
+        // 批量操作模块
+        // ==========================================
+        const Selection = {
+            // 状态
+            mode: false,           // 是否处于选择模式
+            selected: new Set(),   // 选中的链接 realIndex 集合
+            lastIndex: -1,         // 上次点击的 index（用于 Shift 连续选择）
+            _toastTimer: null,
+
+            // 进入选择模式
+            enter() {
+                this.mode = true;
+                document.body.classList.add('selection-mode');
+                this._updateBar();
+            },
+
+            // 退出选择模式
+            exit() {
+                this.mode = false;
+                this.selected.clear();
+                this.lastIndex = -1;
+                document.body.classList.remove('selection-mode');
+                // 清除所有卡片选中状态
+                document.querySelectorAll('.link-card.selected').forEach(c => c.classList.remove('selected'));
+                document.querySelectorAll('.card-checkbox.checked').forEach(c => c.classList.remove('checked'));
+                this._updateBar();
+            },
+
+            // 切换单个链接选中状态
+            toggle(realIndex, cardEl) {
+                if (!this.mode) this.enter();
+                if (this.selected.has(realIndex)) {
+                    this.selected.delete(realIndex);
+                    cardEl.classList.remove('selected');
+                    cardEl.querySelector('.card-checkbox').classList.remove('checked');
+                } else {
+                    this.selected.add(realIndex);
+                    cardEl.classList.add('selected');
+                    cardEl.querySelector('.card-checkbox').classList.add('checked');
+                }
+                this.lastIndex = realIndex;
+                this._updateBar();
+                // 如果全部取消选中，退出选择模式
+                if (this.selected.size === 0) this.exit();
+            },
+
+            // 连续选择（Shift+点击）
+            selectRange(toIndex, toCardEl) {
+                if (!this.mode) this.enter();
+                const cards = Array.from(document.querySelectorAll('.link-card'));
+                // 找到 lastIndex 对应的卡片位置
+                const fromPos = cards.findIndex(c => parseInt(c.dataset.realIndex) === this.lastIndex);
+                const toPos = cards.findIndex(c => parseInt(c.dataset.realIndex) === toIndex);
+                if (fromPos === -1 || toPos === -1) {
+                    this.toggle(toIndex, toCardEl);
+                    return;
+                }
+                const start = Math.min(fromPos, toPos);
+                const end = Math.max(fromPos, toPos);
+                for (let i = start; i <= end; i++) {
+                    const card = cards[i];
+                    const idx = parseInt(card.dataset.realIndex);
+                    this.selected.add(idx);
+                    card.classList.add('selected');
+                    card.querySelector('.card-checkbox').classList.add('checked');
+                }
+                this.lastIndex = toIndex;
+                this._updateBar();
+            },
+
+            // 全选当前可见链接
+            selectAll() {
+                if (!this.mode) this.enter();
+                document.querySelectorAll('.link-card').forEach(card => {
+                    const idx = parseInt(card.dataset.realIndex);
+                    if (!isNaN(idx)) {
+                        this.selected.add(idx);
+                        card.classList.add('selected');
+                        card.querySelector('.card-checkbox').classList.add('checked');
+                    }
+                });
+                this._updateBar();
+            },
+
+            // 更新操作栏
+            _updateBar() {
+                const bar = document.getElementById('batchBar');
+                const countEl = document.getElementById('batchCount');
+                const n = this.selected.size;
+                if (n > 0) {
+                    bar.classList.add('visible');
+                    countEl.textContent = `已选 ${n} 个链接`;
+                } else {
+                    bar.classList.remove('visible');
+                }
+            },
+
+            // Toast 提示
+            toast(msg, duration = 2500) {
+                const el = document.getElementById('batchToast');
+                el.textContent = msg;
+                el.classList.add('show');
+                clearTimeout(this._toastTimer);
+                this._toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+            },
+
+            // 获取选中的链接对象数组
+            getSelectedLinks() {
+                return Array.from(this.selected).map(i => links[i]).filter(Boolean);
+            }
+        };
+
+        // 退出选择模式（供 HTML onclick 调用）
+        function exitSelectionMode() {
+            Selection.exit();
+        }
+
+        // 切换标签下拉菜单
+        function toggleBatchTagMenu() {
+            document.getElementById('batchTagMenu').classList.toggle('open');
+        }
+
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.batch-tag-dropdown')) {
+                document.getElementById('batchTagMenu').classList.remove('open');
+            }
+        });
+
+        // 批量修改标签
+        function batchSetTag(tag) {
+            document.getElementById('batchTagMenu').classList.remove('open');
+            const n = Selection.selected.size;
+            if (n === 0) return;
+            Selection.selected.forEach(i => { if (links[i]) links[i].tag = tag; });
+            saveToStorage();
+            renderAll();
+            // 重新恢复选中状态（renderAll 会重建 DOM）
+            setTimeout(() => {
+                Selection.selected.forEach(i => {
+                    const card = document.querySelector(`.link-card[data-real-index="${i}"]`);
+                    if (card) {
+                        card.classList.add('selected');
+                        card.querySelector('.card-checkbox').classList.add('checked');
+                    }
+                });
+                Selection._updateBar();
+            }, 0);
+            const tagLabel = tag || '（无标签）';
+            Selection.toast(`✅ 已将 ${n} 个链接的标签改为「${tagLabel}」`);
+        }
+
+        // 批量导出
+        function batchExport() {
+            const selected = Selection.getSelectedLinks();
+            if (selected.length === 0) return;
+            const jsonData = JSON.stringify(selected, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `超级大脑_选中链接_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            Selection.toast(`📤 已导出 ${selected.length} 个链接`);
+        }
+
+        // 批量删除
+        function batchDelete() {
+            const n = Selection.selected.size;
+            if (n === 0) return;
+            if (!confirm(`确定删除 ${n} 个选中的链接吗？\n\n此操作不可撤销。`)) return;
+            // 从大到小删除，避免索引偏移
+            const indices = Array.from(Selection.selected).sort((a, b) => b - a);
+            indices.forEach(i => links.splice(i, 1));
+            saveToStorage();
+            Selection.exit();
+            renderAll();
+            Selection.toast(`🗑️ 已删除 ${n} 个链接`);
+        }
+
+        // ==========================================
+        // 修改 renderLinkList：添加复选框 + data-real-index
+        // ==========================================
+        // 重写 renderLinkList，加入批量操作支持
+        const _origRenderLinkList = renderLinkList;
+        renderLinkList = function() {
+            updateCount();
+
+            let result = links;
+            if (activeFilter !== '全部') {
+                result = links.filter(l => l.tag === activeFilter);
+            }
+            if (searchKeyword) {
+                result = result.filter(function(link) {
+                    return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
+                           (link.url && link.url.toLowerCase().includes(searchKeyword)) ||
+                           (link.note && link.note.toLowerCase().includes(searchKeyword));
+                });
+            }
+
+            if (result.length === 0) {
+                if (links.length === 0) {
+                    linkList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📚</div>
+                            <p class="empty-title">还没有任何收藏</p>
+                            <p class="empty-desc">点击上方按钮，开始整理你的知识库吧！</p>
+                        </div>`;
+                } else {
+                    linkList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <p class="empty-title">没有找到匹配的链接</p>
+                            <p class="empty-desc">试试其他关键词或标签～</p>
+                        </div>`;
+                }
+                return;
+            }
+
+            let html = '';
+            result.forEach(function(link) {
+                const realIndex = links.indexOf(link);
+                const isSelected = Selection.selected.has(realIndex);
+                const tagHTML = link.tag
+                    ? `<span class="card-tag">🏷️ ${link.tag}</span>`
+                    : '';
+                const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
+                const url = searchKeyword ? highlight(link.url, searchKeyword) : escapeHTML(link.url);
+                const note = searchKeyword ? highlight(link.note, searchKeyword) : escapeHTML(link.note);
+
+                html += `
+                    <div class="link-card${isSelected ? ' selected' : ''}"
+                         data-real-index="${realIndex}">
+                        <div class="card-checkbox${isSelected ? ' checked' : ''}"
+                             onclick="handleCheckboxClick(event, ${realIndex}, this.closest('.link-card'))">
+                            ${isSelected ? '✓' : ''}
+                        </div>
+                        <div class="card-content">
+                            <h3>📎 ${title}</h3>
+                            <p class="link-url">
+                                🔗 <a href="${escapeHTML(link.url)}" target="_blank">${url}</a>
+                            </p>
+                            <p class="link-note">📝 ${note || '（无笔记）'}</p>
+                            ${tagHTML}
+                            <p class="link-time">🕒 ${link.time}</p>
+                            <div class="card-actions">
+                                <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
+                                <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            linkList.innerHTML = html;
+
+            if (window.LinkPreview) {
+                window.LinkPreview.rebindPreloader();
+            }
+        };
+
+        // 复选框点击处理（支持 Ctrl/Shift 多选）
+        function handleCheckboxClick(e, realIndex, cardEl) {
+            e.stopPropagation();
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+            if (e.shiftKey && Selection.lastIndex !== -1) {
+                // Shift + 点击：连续选择
+                Selection.selectRange(realIndex, cardEl);
+            } else {
+                // 普通点击 / Ctrl+点击：切换单个
+                Selection.toggle(realIndex, cardEl);
+            }
+        }
+
+        // ==========================================
+        // 全局键盘事件监听
+        // ==========================================
+        document.addEventListener('keydown', function(e) {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+            // Ctrl/Cmd + K：聚焦 URL 输入框
+            if (modKey && e.key === 'k') {
+                e.preventDefault();
+                focusUrlInput();
+                return;
+            }
+
+            // Ctrl/Cmd + F：聚焦搜索框（阻止浏览器默认查找）
+            if (modKey && e.key === 'f') {
+                e.preventDefault();
+                focusSearch();
+                return;
+            }
+
+            // Ctrl/Cmd + A：全选可见链接
+            if (modKey && e.key === 'a' && !isTyping()) {
+                e.preventDefault();
+                Selection.selectAll();
+                return;
+            }
+
+            // Ctrl/Cmd + D：取消选择
+            if (modKey && e.key === 'd' && !isTyping()) {
+                e.preventDefault();
+                if (Selection.mode) {
+                    Selection.exit();
+                }
+                return;
+            }
+
+            // Delete / Backspace：删除选中项（需确认）
+            if ((e.key === 'Delete') && !isTyping() && Selection.mode && Selection.selected.size > 0) {
+                e.preventDefault();
+                batchDelete();
+                return;
+            }
+
+            // ESC：退出选择模式 > 清空搜索 > 失焦
+            if (e.key === 'Escape') {
+                if (Selection.mode) {
+                    Selection.exit();
+                    return;
+                }
+                if (isTyping()) {
+                    document.activeElement.blur();
+                } else {
+                    clearSearch();
+                }
+                return;
+            }
+
+            // / 键：聚焦搜索框（非输入状态下）
+            if (e.key === '/' && !isTyping()) {
+                e.preventDefault();
+                focusSearch();
+                return;
+            }
+        });
     </script>
 </body>
 </html>

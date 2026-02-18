@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>链接预览 API 测试</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f5f5;
+        }
+
+        h1 { font-size: 20px; margin-bottom: 4px; }
+        .subtitle { color: #666; font-size: 13px; margin-bottom: 24px; }
+
+        /* 输入区域 */
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover { background: #005bb5; }
+        button:disabled { background: #aaa; cursor: not-allowed; }
+
+        /* API 选择 */
+        .api-selector {
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .api-selector label {
+            margin-right: 16px;
+            cursor: pointer;
+        }
+
+        /* 状态区域 */
+        #status {
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        #status.loading { background: #fff3cd; border: 1px solid #ffc107; color: #856404; }
+        #status.success { background: #d4edda; border: 1px solid #28a745; color: #155724; }
+        #status.error   { background: #f8d7da; border: 1px solid #dc3545; color: #721c24; }
+
+        /* 预览卡片 */
+        #previewCard {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .preview-favicon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            object-fit: contain;
+            background: #f0f0f0;
+        }
+
+        .preview-favicon-fallback {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: #0071e3;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .preview-domain {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .preview-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .preview-description {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        /* 原始 JSON 数据 */
+        #rawJson {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .toggle-json {
+            font-size: 12px;
+            color: #0071e3;
+            cursor: pointer;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        /* 测试用例 */
+        .test-urls {
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .test-urls strong { display: block; margin-bottom: 6px; }
+
+        .test-url-btn {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 3px;
+            color: #333;
+            font-family: monospace;
+        }
+
+        .test-url-btn:hover { background: #dee2e6; }
+
+        /* 请求信息 */
+        .request-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+
+        hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>🔍 链接预览 API 测试工具</h1>
+    <p class="subtitle">用于验证 API 可用性、CORS 问题和返回数据结构</p>
+
+    <!-- 快速测试 URL -->
+    <div class="test-urls">
+        <strong>快速测试 URL（点击填入）：</strong>
+        <span class="test-url-btn" onclick="fillUrl('https://github.com')">github.com</span>
+        <span class="test-url-btn" onclick="fillUrl('https://www.zhihu.com')">zhihu.com</span>
+        <span class="test-url-btn" onclick="fillUrl('https://juejin.cn')">juejin.cn</span>
+        <span class="test-url-btn" onclick="fillUrl('https://developer.mozilla.org')">MDN</span>
+        <span class="test-url-btn" onclick="fillUrl('https://www.youtube.com')">youtube.com</span>
+        <span class="test-url-btn" onclick="fillUrl('https://openai.com')">openai.com</span>
+    </div>
+
+    <!-- API 选择 -->
+    <div class="api-selector">
+        <strong>选择 API：</strong><br><br>
+        <label>
+            <input type="radio" name="api" value="microlink" checked>
+            microlink.io（无需 Key，50次/天）
+        </label>
+        <label>
+            <input type="radio" name="api" value="jsonlink">
+            jsonlink.io（需要 Key，1000次/月）
+        </label>
+        <label>
+            <input type="radio" name="api" value="favicon_only">
+            仅 Favicon（Google，无限制）
+        </label>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="input-row">
+        <input type="text" id="urlInput" placeholder="输入要预览的 URL，如 https://github.com" value="https://github.com">
+        <button id="fetchBtn" onclick="fetchPreview()">获取预览</button>
+    </div>
+
+    <!-- 请求信息 -->
+    <div class="request-info" id="requestInfo"></div>
+
+    <!-- 状态 -->
+    <div id="status"></div>
+
+    <!-- 预览卡片 -->
+    <div id="previewCard">
+        <div class="preview-header">
+            <img class="preview-favicon" id="previewFavicon" src="" alt="favicon" onerror="this.style.display='none'; document.getElementById('faviconFallback').style.display='flex'">
+            <div class="preview-favicon-fallback" id="faviconFallback" style="display:none">?</div>
+            <div class="preview-domain" id="previewDomain"></div>
+        </div>
+        <div class="preview-title" id="previewTitle"></div>
+        <div class="preview-description" id="previewDescription"></div>
+        <img class="preview-image" id="previewImage" src="" alt="preview" style="display:none" onerror="this.style.display='none'">
+    </div>
+
+    <!-- JSON 原始数据 -->
+    <button class="toggle-json" id="toggleJsonBtn" onclick="toggleJson()">▶ 查看原始 JSON 数据</button>
+    <pre id="rawJson"></pre>
+
+    <hr>
+
+    <!-- 说明 -->
+    <div style="font-size: 12px; color: #666; line-height: 1.8;">
+        <strong>测试目的：</strong><br>
+        ✅ 验证 API 是否可用（CORS 是否通过）<br>
+        ✅ 查看返回的数据结构<br>
+        ✅ 测试不同网站的预览效果<br>
+        ✅ 评估响应速度<br>
+        <br>
+        <strong>注意事项：</strong><br>
+        • microlink.io 免费版限制 50次/天，超出后返回 429<br>
+        • 部分网站（如微信）会屏蔽爬虫，返回数据可能为空<br>
+        • 图片可能因防盗链无法显示<br>
+        • 打开 F12 控制台可查看详细网络请求
+    </div>
+
+    <script>
+        // ==========================================
+        // 填入测试 URL
+        // ==========================================
+        function fillUrl(url) {
+            document.getElementById('urlInput').value = url;
+        }
+
+        // ==========================================
+        // 获取选中的 API
+        // ==========================================
+        function getSelectedApi() {
+            return document.querySelector('input[name="api"]:checked').value;
+        }
+
+        // ==========================================
+        // 显示状态
+        // ==========================================
+        function showStatus(type, msg) {
+            const el = document.getElementById('status');
+            el.className = type;
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        // ==========================================
+        // 显示/隐藏 JSON
+        // ==========================================
+        function toggleJson() {
+            const raw = document.getElementById('rawJson');
+            const btn = document.getElementById('toggleJsonBtn');
+            if (raw.style.display === 'none') {
+                raw.style.display = 'block';
+                btn.textContent = '▼ 隐藏原始 JSON 数据';
+            } else {
+                raw.style.display = 'none';
+                btn.textContent = '▶ 查看原始 JSON 数据';
+            }
+        }
+
+        // ==========================================
+        // 主函数：获取预览
+        // ==========================================
+        async function fetchPreview() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showStatus('error', '❌ 请输入 URL');
+                return;
+            }
+
+            // 简单 URL 格式校验
+            let targetUrl = url;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                targetUrl = 'https://' + url;
+                urlInput.value = targetUrl;
+            }
+
+            const api = getSelectedApi();
+            const btn = document.getElementById('fetchBtn');
+            const startTime = Date.now();
+
+            // 重置 UI
+            btn.disabled = true;
+            btn.textContent = '请求中...';
+            document.getElementById('previewCard').style.display = 'none';
+            document.getElementById('rawJson').style.display = 'none';
+            document.getElementById('toggleJsonBtn').style.display = 'none';
+            document.getElementById('requestInfo').style.display = 'none';
+
+            showStatus('loading', '⏳ 正在请求 API，请稍候...');
+
+            try {
+                let data = null;
+                let apiUrl = '';
+
+                if (api === 'microlink') {
+                    // ---- microlink.io ----
+                    apiUrl = `https://api.microlink.io/?url=${encodeURIComponent(targetUrl)}`;
+                    showRequestInfo('GET', apiUrl);
+
+                    const res = await fetch(apiUrl);
+                    const json = await res.json();
+                    const elapsed = Date.now() - startTime;
+
+                    // 显示原始 JSON
+                    showRawJson(json);
+
+                    if (json.status === 'success' && json.data) {
+                        data = {
+                            title: json.data.title || '',
+                            description: json.data.description || '',
+                            image: json.data.image ? json.data.image.url : '',
+                            favicon: json.data.logo ? json.data.logo.url : getFavicon(targetUrl),
+                            domain: new URL(targetUrl).hostname,
+                        };
+                        showStatus('success', `✅ 成功！耗时 ${elapsed}ms | API: microlink.io | 状态: ${json.status}`);
+                    } else {
+                        showStatus('error', `⚠️ API 返回异常：${json.status || '未知'} | 耗时 ${elapsed}ms`);
+                        btn.disabled = false;
+                        btn.textContent = '获取预览';
+                        return;
+                    }
+
+                } else if (api === 'jsonlink') {
+                    // ---- jsonlink.io（需要 Key，这里演示请求结构）----
+                    // 注意：没有 Key 会返回 401，这里仅演示请求格式
+                    const API_KEY = 'YOUR_API_KEY_HERE'; // 替换为你的 Key
+                    apiUrl = `https://jsonlink.io/api/extract?url=${encodeURIComponent(targetUrl)}&api_key=${API_KEY}`;
+                    showRequestInfo('GET', apiUrl.replace(API_KEY, '***KEY***'));
+
+                    const res = await fetch(apiUrl);
+                    const json = await res.json();
+                    const elapsed = Date.now() - startTime;
+
+                    showRawJson(json);
+
+                    if (res.ok && json.title) {
+                        data = {
+                            title: json.title || '',
+                            description: json.description || '',
+                            image: json.images && json.images[0] ? json.images[0] : '',
+                            favicon: json.favicon || getFavicon(targetUrl),
+                            domain: new URL(targetUrl).hostname,
+                        };
+                        showStatus('success', `✅ 成功！耗时 ${elapsed}ms | API: jsonlink.io`);
+                    } else {
+                        showStatus('error', `⚠️ jsonlink.io 返回错误（可能需要有效的 API Key）| 耗时 ${elapsed}ms`);
+                        btn.disabled = false;
+                        btn.textContent = '获取预览';
+                        return;
+                    }
+
+                } else if (api === 'favicon_only') {
+                    // ---- 仅 Favicon（Google S2 服务）----
+                    const domain = new URL(targetUrl).hostname;
+                    apiUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                    showRequestInfo('GET (img)', apiUrl);
+
+                    const elapsed = Date.now() - startTime;
+                    data = {
+                        title: domain,
+                        description: '（仅 Favicon 模式，不调用预览 API）',
+                        image: '',
+                        favicon: apiUrl,
+                        domain: domain,
+                    };
+                    showStatus('success', `✅ Favicon 模式 | 耗时 ${elapsed}ms | 无 CORS 问题`);
+                    showRawJson({ mode: 'favicon_only', favicon_url: apiUrl, domain });
+                }
+
+                // 渲染预览卡片
+                if (data) {
+                    renderPreview(data);
+                }
+
+            } catch (err) {
+                const elapsed = Date.now() - startTime;
+                showStatus('error', `❌ 请求失败！耗时 ${elapsed}ms\n错误：${err.message}\n\n可能原因：CORS 跨域被拒绝、网络超时、API 不可用`);
+                showRawJson({ error: err.message, type: err.name, tip: '请打开 F12 控制台查看详细错误信息' });
+                console.error('链接预览请求失败：', err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '获取预览';
+            }
+        }
+
+        // ==========================================
+        // 渲染预览卡片
+        // ==========================================
+        function renderPreview(data) {
+            const card = document.getElementById('previewCard');
+
+            // Favicon
+            const faviconEl = document.getElementById('previewFavicon');
+            const fallbackEl = document.getElementById('faviconFallback');
+            if (data.favicon) {
+                faviconEl.src = data.favicon;
+                faviconEl.style.display = 'block';
+                fallbackEl.style.display = 'none';
+            } else {
+                faviconEl.style.display = 'none';
+                fallbackEl.textContent = (data.domain || '?')[0].toUpperCase();
+                fallbackEl.style.display = 'flex';
+            }
+
+            // 域名
+            document.getElementById('previewDomain').textContent = data.domain || '';
+
+            // 标题
+            document.getElementById('previewTitle').textContent = data.title || '（无标题）';
+
+            // 描述
+            document.getElementById('previewDescription').textContent = data.description || '（无描述）';
+
+            // 图片
+            const imgEl = document.getElementById('previewImage');
+            if (data.image) {
+                imgEl.src = data.image;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+            }
+
+            card.style.display = 'block';
+        }
+
+        // ==========================================
+        // 显示原始 JSON
+        // ==========================================
+        function showRawJson(data) {
+            const raw = document.getElementById('rawJson');
+            const btn = document.getElementById('toggleJsonBtn');
+            raw.textContent = JSON.stringify(data, null, 2);
+            raw.style.display = 'none'; // 默认折叠
+            btn.style.display = 'inline-block';
+            btn.textContent = '▶ 查看原始 JSON 数据';
+        }
+
+        // ==========================================
+        // 显示请求信息
+        // ==========================================
+        function showRequestInfo(method, url) {
+            const el = document.getElementById('requestInfo');
+            el.textContent = `${method} ${url}`;
+            el.style.display = 'block';
+        }
+
+        // ==========================================
+        // 获取 Google Favicon URL
+        // ==========================================
+        function getFavicon(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            } catch {
+                return '';
+            }
+        }
+
+        // ==========================================
+        // 回车键触发
+        // ==========================================
+        document.getElementById('urlInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') fetchPreview();
+        });
+    </script>
+</body>
+</html>

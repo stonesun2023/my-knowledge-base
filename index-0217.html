@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -5,76 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>超级大脑</title>
     <style>
-        /* ==========================================
-           CSS 变量定义（浅色模式）
-        ========================================== */
-        :root {
-            --bg-primary: #f5f5f7;
-            --bg-secondary: white;
-            --bg-card: #f9f9f9;
-            --bg-card-hover: white;
-            
-            --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
-            --text-tertiary: #999;
-            
-            --border-color: #d2d2d7;
-            --accent-color: #0071e3;
-            --accent-hover: #0077ed;
-            
-            --tag-bg: #e3f2fd;
-            --tag-color: #0071e3;
-            
-            --shadow-light: rgba(0, 0, 0, 0.08);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
-            --shadow-heavy: rgba(0, 113, 227, 0.3);
-            
-            --highlight-bg: #fff59d;
-        }
-
-        /* ==========================================
-           深色模式变量
-        ========================================== */
-        body.dark-mode {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-card: #2d2d2d;
-            --bg-card-hover: #3a3a3a;
-            
-            --text-primary: #f5f5f7;
-            --text-secondary: #b0b0b0;
-            --text-tertiary: #808080;
-            
-            --border-color: #404040;
-            --accent-color: #0a84ff;
-            --accent-hover: #409cff;
-            
-            --tag-bg: #1e3a5f;
-            --tag-color: #64b5f6;
-            
-            --shadow-light: rgba(0, 0, 0, 0.3);
-            --shadow-medium: rgba(0, 0, 0, 0.5);
-            --shadow-heavy: rgba(10, 132, 255, 0.3);
-            
-            --highlight-bg: #4a4a2a;
-        }
-
-        /* ==========================================
-           基础样式
-        ========================================== */
         * {
             box-sizing: border-box;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            background-color: #f5f5f7;
             margin: 0;
             padding: 40px 20px;
             min-height: 100vh;
             animation: fadeIn 0.5s ease-in;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         @keyframes fadeIn {
@@ -85,106 +27,55 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            position: relative;
         }
 
-        /* ==========================================
-           主题切换按钮（右上角）
-        ========================================== */
-        #themeToggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px var(--shadow-light);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            padding: 0;
-            margin: 0;
-        }
-
-        #themeToggle:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: 0 6px 16px var(--shadow-medium);
-        }
-
-        #themeToggle:active {
-            transform: scale(0.95);
-        }
-
-        /* ==========================================
-           标题
-        ========================================== */
         h1 {
-            color: var(--text-primary);
+            color: #1d1d1f;
             text-align: center;
             font-size: 56px;
             font-weight: 600;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
-            transition: color 0.3s ease;
         }
 
         .subtitle {
-            color: var(--text-secondary);
+            color: #6e6e73;
             text-align: center;
             font-size: 21px;
             line-height: 1.4;
             margin-bottom: 0;
-            transition: color 0.3s ease;
         }
 
         h2 {
-            color: var(--text-primary);
+            color: #1d1d1f;
             margin-top: 60px;
             margin-bottom: 20px;
             font-size: 32px;
             font-weight: 600;
-            transition: color 0.3s ease;
         }
 
-        /* ==========================================
-           输入框
-        ========================================== */
         input[type="text"] {
             width: 100%;
             padding: 16px;
             margin: 10px 0;
-            border: 1px solid var(--border-color);
+            border: 1px solid #d2d2d7;
             border-radius: 12px;
             font-size: 17px;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            background-color: white;
             transition: all 0.3s ease;
             outline: none;
         }
 
         input[type="text"]:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.1);
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
         }
 
-        input[type="text"]::placeholder {
-            color: var(--text-tertiary);
-        }
-
-        /* ==========================================
-           按钮
-        ========================================== */
         .save-btn {
             width: 100%;
             padding: 16px;
             margin: 16px 0;
-            background-color: var(--accent-color);
+            background-color: #0071e3;
             color: white;
             border: none;
             border-radius: 12px;
@@ -195,28 +86,25 @@
         }
 
         .save-btn:hover {
-            background-color: var(--accent-hover);
+            background-color: #0077ed;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--shadow-heavy);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
         }
 
         .save-btn:active {
             transform: translateY(0);
         }
 
-        /* ==========================================
-           标签选择区域
-        ========================================== */
+        /* 标签选择区域 */
         .tag-selector {
             margin: 12px 0;
         }
 
         .tag-selector label {
-            color: var(--text-primary);
+            color: #1d1d1f;
             font-size: 16px;
             display: block;
             margin-bottom: 10px;
-            transition: color 0.3s ease;
         }
 
         .tag-selector-buttons {
@@ -225,11 +113,12 @@
             gap: 8px;
         }
 
+        /* 通用标签按钮 */
         .tag-btn {
             padding: 8px 16px;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
+            background-color: white;
+            color: #1d1d1f;
+            border: 2px solid #d2d2d7;
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
@@ -240,34 +129,34 @@
         }
 
         .tag-btn:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
+            border-color: #0071e3;
+            color: #0071e3;
             transform: none;
             box-shadow: none;
+            background-color: white;
         }
 
         .tag-btn.selected {
-            background-color: var(--accent-color);
+            background-color: #0071e3;
             color: white;
-            border-color: var(--accent-color);
+            border-color: #0071e3;
         }
 
         .tag-btn.selected:hover {
-            background-color: var(--accent-hover);
+            background-color: #0077ed;
+            color: white;
         }
 
-        /* ==========================================
-           收藏列表区域
-        ========================================== */
+        /* 收藏列表区域 */
         #collections {
-            background-color: var(--bg-secondary);
+            background-color: white;
             padding: 32px;
             border-radius: 16px;
             margin-top: 20px;
-            box-shadow: 0 4px 16px var(--shadow-light);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
+        /* 筛选栏 */
         #filterBar {
             display: flex;
             flex-wrap: wrap;
@@ -275,6 +164,7 @@
             margin-bottom: 20px;
         }
 
+        /* 搜索框容器 */
         .search-container {
             margin-bottom: 20px;
         }
@@ -283,29 +173,26 @@
             margin: 0;
         }
 
-        /* ==========================================
-           链接卡片
-        ========================================== */
+        /* 链接卡片 */
         .link-card {
-            background-color: var(--bg-card);
+            background-color: #f9f9f9;
             padding: 20px;
             margin: 12px 0;
             border-radius: 12px;
-            border-left: 4px solid var(--accent-color);
+            border-left: 4px solid #0071e3;
             transition: all 0.3s ease;
         }
 
         .link-card:hover {
-            background-color: var(--bg-card-hover);
-            box-shadow: 0 4px 12px var(--shadow-medium);
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
 
         .link-card h3 {
             margin: 0 0 10px 0;
-            color: var(--text-primary);
+            color: #1d1d1f;
             font-size: 18px;
-            transition: color 0.3s ease;
         }
 
         .link-card .link-url {
@@ -314,38 +201,29 @@
         }
 
         .link-card .link-url a {
-            color: var(--accent-color);
+            color: #0071e3;
             text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .link-card .link-url a:hover {
-            color: var(--accent-hover);
-            text-decoration: underline;
         }
 
         .link-card .link-note {
             margin: 10px 0 0 0;
-            color: var(--text-secondary);
-            transition: color 0.3s ease;
+            color: #6e6e73;
         }
 
         .link-card .link-time {
             margin: 10px 0 0 0;
-            color: var(--text-tertiary);
+            color: #999;
             font-size: 14px;
-            transition: color 0.3s ease;
         }
 
         .link-card .card-tag {
             display: inline-block;
             padding: 4px 12px;
-            background-color: var(--tag-bg);
-            color: var(--tag-color);
+            background-color: #e3f2fd;
+            color: #0071e3;
             border-radius: 12px;
             font-size: 13px;
             margin-top: 8px;
-            transition: all 0.3s ease;
         }
 
         .card-actions {
@@ -354,8 +232,9 @@
             gap: 8px;
         }
 
-        .edit-btn, .delete-btn {
+        .edit-btn {
             padding: 8px 16px;
+            background-color: #0071e3;
             color: white;
             border: none;
             border-radius: 8px;
@@ -366,18 +245,23 @@
             transition: all 0.2s ease;
         }
 
-        .edit-btn {
-            background-color: var(--accent-color);
-        }
-
         .edit-btn:hover {
-            background-color: var(--accent-hover);
+            background-color: #0077ed;
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px var(--shadow-heavy);
+            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
         }
 
         .delete-btn {
+            padding: 8px 16px;
             background-color: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+            transition: all 0.2s ease;
         }
 
         .delete-btn:hover {
@@ -386,13 +270,11 @@
             box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
         }
 
-        /* ==========================================
-           空状态
-        ========================================== */
+        /* 空状态 */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-secondary);
+            color: #6e6e73;
         }
 
         .empty-state .empty-icon {
@@ -402,53 +284,110 @@
 
         .empty-state .empty-title {
             font-size: 20px;
-            color: var(--text-primary);
+            color: #1d1d1f;
             margin-bottom: 8px;
-            transition: color 0.3s ease;
+            text-align: center;
         }
 
         .empty-state .empty-desc {
             font-size: 16px;
-            color: var(--text-secondary);
-            transition: color 0.3s ease;
+            text-align: center;
         }
 
-        /* ==========================================
-           高亮
-        ========================================== */
+        /* 高亮 */
         .highlight {
-            background-color: var(--highlight-bg);
+            background-color: #fff59d;
             padding: 2px 4px;
             border-radius: 3px;
-            transition: background-color 0.3s ease;
         }
-
-        /* ==========================================
-           响应式设计
-        ========================================== */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 40px;
+            /* 深色模式样式 */
+            body.dark-mode {
+                background-color: #18191a;
+                color: #e4e6eb;
             }
-
-            h2 {
-                font-size: 24px;
+            body.dark-mode h1,
+            body.dark-mode h2,
+            body.dark-mode .empty-state .empty-title {
+                color: #e4e6eb;
             }
-
-            #themeToggle {
-                top: 10px;
-                right: 10px;
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
+            body.dark-mode .subtitle {
+                color: #b0b3b8;
             }
-        }
+            body.dark-mode input[type="text"] {
+                background-color: #242526;
+                color: #e4e6eb;
+                border-color: #3a3b3c;
+            }
+            body.dark-mode input[type="text"]:focus {
+                border-color: #4e8cff;
+                box-shadow: 0 0 0 4px rgba(78, 140, 255, 0.1);
+            }
+            body.dark-mode .save-btn {
+                background-color: #4e8cff;
+                color: #fff;
+            }
+            body.dark-mode .save-btn:hover {
+                background-color: #357ae8;
+            }
+            body.dark-mode .tag-btn {
+                background-color: #242526;
+                color: #e4e6eb;
+                border-color: #3a3b3c;
+            }
+            body.dark-mode .tag-btn.selected {
+                background-color: #4e8cff;
+                color: #fff;
+                border-color: #4e8cff;
+            }
+            body.dark-mode #collections {
+                background-color: #242526;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            }
+            body.dark-mode .link-card {
+                background-color: #23272f;
+                border-left: 4px solid #4e8cff;
+            }
+            body.dark-mode .link-card:hover {
+                background-color: #242526;
+            }
+            body.dark-mode .link-card h3 {
+                color: #e4e6eb;
+            }
+            body.dark-mode .link-card .link-note {
+                color: #b0b3b8;
+            }
+            body.dark-mode .link-card .link-time {
+                color: #888;
+            }
+            body.dark-mode .link-card .card-tag {
+                background-color: #2d3a4a;
+                color: #4e8cff;
+            }
+            body.dark-mode .edit-btn {
+                background-color: #4e8cff;
+            }
+            body.dark-mode .edit-btn:hover {
+                background-color: #357ae8;
+            }
+            body.dark-mode .delete-btn {
+                background-color: #ff3b30;
+            }
+            body.dark-mode .delete-btn:hover {
+                background-color: #c62828;
+            }
+            body.dark-mode .empty-state {
+                color: #b0b3b8;
+            }
+            body.dark-mode .highlight {
+                background-color: #3a3b3c;
+            }
     </style>
 </head>
 <body>
-    <!-- 主题切换按钮 -->
-    <button id="themeToggle" title="切换主题">🌙</button>
-
+    <!-- 深色模式切换按钮 -->
+    <div style="position: fixed; top: 18px; right: 24px; z-index: 999;">
+        <button id="darkModeToggle" style="padding: 8px 18px; border-radius: 20px; border: none; background: #222; color: #fff; font-size: 15px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">🌙 深色模式</button>
+    </div>
     <div class="container">
         <h1>超级大脑 🚀</h1>
         <p class="subtitle">欢迎使用我的链接收藏工具！在这里整理你的知识。</p>
@@ -477,7 +416,7 @@
 
         <h2>
             我的收藏 📚
-            <span id="countLabel" style="color: var(--accent-color); font-size: 24px; font-weight: 400;"></span>
+            <span id="countLabel" style="color: #0071e3; font-size: 24px; font-weight: 400;"></span>
         </h2>
 
         <!-- 工具栏 -->
@@ -508,48 +447,55 @@
                 📥 导入数据
             </button>
         </div>
+        <!-- 隐藏的文件输入框（用于导入） -->
         <input type="file" id="importFile" accept=".json" style="display: none;">
 
         <div id="collections">
+            <!-- 标签筛选栏 -->
             <div id="filterBar"></div>
+
+            <!-- 搜索框 -->
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="🔍 搜索链接（标题、URL、笔记...）">
             </div>
+
+            <!-- 链接列表 -->
             <div id="linkList"></div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 主题切换
-        // ==========================================
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        const STORAGE_KEY_THEME = 'superBrain_darkMode';
-
-        // 加载保存的主题
-        const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-        if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-            themeToggle.textContent = '☀️';
+        // 深色模式切换逻辑
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        function setDarkMode(enabled) {
+            if (enabled) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.textContent = '☀️ 浅色模式';
+            } else {
+                document.body.classList.remove('dark-mode');
+                darkModeToggle.textContent = '🌙 深色模式';
+            }
+            localStorage.setItem('darkMode', enabled ? '1' : '0');
         }
-
-        // 切换主题
-        themeToggle.onclick = function() {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-            themeToggle.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+        // 初始化深色模式状态
+        (function() {
+            const saved = localStorage.getItem('darkMode');
+            if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                setDarkMode(true);
+            } else {
+                setDarkMode(false);
+            }
+        })();
+        darkModeToggle.onclick = function() {
+            setDarkMode(!document.body.classList.contains('dark-mode'));
         };
-
         // ==========================================
         // 数据和状态
         // ==========================================
-        const STORAGE_KEY_LINKS = 'superBrain_links';
-        let links = JSON.parse(localStorage.getItem(STORAGE_KEY_LINKS) || '[]');
-        let selectedAddTag = '';
-        let activeFilter = '全部';
-        let searchKeyword = '';
+        let links = JSON.parse(localStorage.getItem('myLinks') || '[]');
+        let selectedAddTag = '';    // 添加表单中选中的标签
+        let activeFilter = '全部';  // 当前筛选标签
+        let searchKeyword = '';     // 当前搜索关键词
 
         // ==========================================
         // 获取 DOM 元素
@@ -570,9 +516,11 @@
         addTagButtons.forEach(function(btn) {
             btn.onclick = function() {
                 if (selectedAddTag === this.dataset.tag) {
+                    // 取消选中
                     selectedAddTag = '';
                     this.classList.remove('selected');
                 } else {
+                    // 选中新标签
                     addTagButtons.forEach(b => b.classList.remove('selected'));
                     selectedAddTag = this.dataset.tag;
                     this.classList.add('selected');
@@ -605,17 +553,20 @@
             links.unshift(newLink);
             saveToStorage();
 
+            // 清空表单
             inputUrl.value = '';
             inputTitle.value = '';
             inputNote.value = '';
             selectedAddTag = '';
             addTagButtons.forEach(b => b.classList.remove('selected'));
 
+            // 重置筛选，显示最新
             activeFilter = '全部';
             searchInput.value = '';
             searchKeyword = '';
 
             renderAll();
+            console.log('✅ 链接已保存！');
         };
 
         // ==========================================
@@ -630,11 +581,11 @@
         // 保存到 localStorage
         // ==========================================
         function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(links));
+            localStorage.setItem('myLinks', JSON.stringify(links));
         }
 
         // ==========================================
-        // 渲染所有
+        // 渲染所有（筛选栏 + 列表）
         // ==========================================
         function renderAll() {
             renderFilterBar();
@@ -645,6 +596,7 @@
         // 渲染标签筛选栏
         // ==========================================
         function renderFilterBar() {
+            // 收集所有已使用的标签
             const usedTags = [];
             links.forEach(function(link) {
                 if (link.tag && !usedTags.includes(link.tag)) {
@@ -652,17 +604,21 @@
                 }
             });
 
+            // 没有标签就隐藏筛选栏
             if (usedTags.length === 0) {
                 filterBar.innerHTML = '';
                 return;
             }
 
             let html = '';
+
+            // "全部"按钮
             const allClass = activeFilter === '全部' ? 'tag-btn selected' : 'tag-btn';
             html += `<button class="${allClass}" onclick="setFilter('全部')">
                         📚 全部（${links.length}）
                      </button>`;
 
+            // 各标签按钮
             usedTags.forEach(function(tag) {
                 const count = links.filter(l => l.tag === tag).length;
                 const btnClass = activeFilter === tag ? 'tag-btn selected' : 'tag-btn';
@@ -688,13 +644,16 @@
         // 渲染链接列表
         // ==========================================
         function renderLinkList() {
+            // 更新计数
             updateCount();
 
+            // 第一步：按标签筛选
             let result = links;
             if (activeFilter !== '全部') {
                 result = links.filter(l => l.tag === activeFilter);
             }
 
+            // 第二步：按关键词搜索
             if (searchKeyword) {
                 result = result.filter(function(link) {
                     return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
@@ -703,6 +662,7 @@
                 });
             }
 
+            // 空状态
             if (result.length === 0) {
                 if (links.length === 0) {
                     linkList.innerHTML = `
@@ -722,6 +682,7 @@
                 return;
             }
 
+            // 渲染卡片
             let html = '';
             result.forEach(function(link) {
                 const realIndex = links.indexOf(link);
@@ -785,6 +746,7 @@
                 saveToStorage();
                 activeFilter = '全部';
                 renderAll();
+                console.log('🗑️ 链接已删除！');
             }
         }
 
@@ -798,16 +760,19 @@
             inputTitle.value = link.title;
             inputNote.value = link.note || '';
 
+            // 恢复标签选中状态
             selectedAddTag = link.tag || '';
             addTagButtons.forEach(function(btn) {
                 btn.classList.toggle('selected', btn.dataset.tag === selectedAddTag);
             });
 
+            // 删除原记录
             links.splice(index, 1);
             saveToStorage();
             activeFilter = '全部';
             renderAll();
 
+            // 滚动到顶部
             window.scrollTo({ top: 0, behavior: 'smooth' });
             alert('内容已填充到输入框，修改后点击"立即收藏"完成编辑！');
         }
@@ -844,16 +809,23 @@
                 return;
             }
 
+            // 把数据转换为 JSON 字符串（格式化，方便阅读）
             const jsonData = JSON.stringify(links, null, 2);
+
+            // 创建一个下载链接
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
+            // 自动点击下载
             const a = document.createElement('a');
             a.href = url;
             a.download = `超级大脑备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
             a.click();
 
+            // 清理
             URL.revokeObjectURL(url);
+
+            console.log(`✅ 已导出 ${links.length} 个链接`);
         };
 
         // ==========================================
@@ -871,13 +843,16 @@
 
             reader.onload = function(e) {
                 try {
+                    // 解析 JSON 文件
                     const importedLinks = JSON.parse(e.target.result);
 
+                    // 验证数据格式
                     if (!Array.isArray(importedLinks)) {
                         alert('文件格式不正确！请选择正确的备份文件。');
                         return;
                     }
 
+                    // 询问导入方式
                     const choice = confirm(
                         `文件中有 ${importedLinks.length} 个链接\n\n` +
                         `点击"确定"：合并到现有数据（推荐）\n` +
@@ -885,6 +860,7 @@
                     );
 
                     if (choice) {
+                        // 合并（避免重复）
                         let addedCount = 0;
                         importedLinks.forEach(function(importedLink) {
                             const exists = links.some(l => l.url === importedLink.url);
@@ -895,23 +871,27 @@
                         });
                         alert(`✅ 导入完成！新增了 ${addedCount} 个链接`);
                     } else {
+                        // 替换
                         links = importedLinks;
                         alert(`✅ 导入完成！共 ${links.length} 个链接`);
                     }
 
+                    // 保存并刷新
                     saveToStorage();
                     activeFilter = '全部';
                     renderAll();
 
                 } catch (error) {
                     alert('文件解析失败！请确认是否为正确的 JSON 备份文件。');
+                    console.error('导入错误：', error);
                 }
             };
 
             reader.readAsText(file);
+
+            // 重置文件输入框（允许重复导入同一文件）
             this.value = '';
         };
-
         // ==========================================
         // 初始化
         // ==========================================

@@ -1,0 +1,22 @@
+{
+  "name": "my-knowledge-base",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "http-server -p 8080 -o",
+    "dev": "http-server -p 3000 -o",
+    "deploy": "git add . && git commit -m '更新' && git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stonesun2023/my-knowledge-base.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/stonesun2023/my-knowledge-base/issues"
+  },
+  "homepage": "https://github.com/stonesun2023/my-knowledge-base#readme"
+}

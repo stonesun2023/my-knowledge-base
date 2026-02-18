@@ -300,9 +300,94 @@
             padding: 2px 4px;
             border-radius: 3px;
         }
+            /* 深色模式样式 */
+            body.dark-mode {
+                background-color: #18191a;
+                color: #e4e6eb;
+            }
+            body.dark-mode h1,
+            body.dark-mode h2,
+            body.dark-mode .empty-state .empty-title {
+                color: #e4e6eb;
+            }
+            body.dark-mode .subtitle {
+                color: #b0b3b8;
+            }
+            body.dark-mode input[type="text"] {
+                background-color: #242526;
+                color: #e4e6eb;
+                border-color: #3a3b3c;
+            }
+            body.dark-mode input[type="text"]:focus {
+                border-color: #4e8cff;
+                box-shadow: 0 0 0 4px rgba(78, 140, 255, 0.1);
+            }
+            body.dark-mode .save-btn {
+                background-color: #4e8cff;
+                color: #fff;
+            }
+            body.dark-mode .save-btn:hover {
+                background-color: #357ae8;
+            }
+            body.dark-mode .tag-btn {
+                background-color: #242526;
+                color: #e4e6eb;
+                border-color: #3a3b3c;
+            }
+            body.dark-mode .tag-btn.selected {
+                background-color: #4e8cff;
+                color: #fff;
+                border-color: #4e8cff;
+            }
+            body.dark-mode #collections {
+                background-color: #242526;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            }
+            body.dark-mode .link-card {
+                background-color: #23272f;
+                border-left: 4px solid #4e8cff;
+            }
+            body.dark-mode .link-card:hover {
+                background-color: #242526;
+            }
+            body.dark-mode .link-card h3 {
+                color: #e4e6eb;
+            }
+            body.dark-mode .link-card .link-note {
+                color: #b0b3b8;
+            }
+            body.dark-mode .link-card .link-time {
+                color: #888;
+            }
+            body.dark-mode .link-card .card-tag {
+                background-color: #2d3a4a;
+                color: #4e8cff;
+            }
+            body.dark-mode .edit-btn {
+                background-color: #4e8cff;
+            }
+            body.dark-mode .edit-btn:hover {
+                background-color: #357ae8;
+            }
+            body.dark-mode .delete-btn {
+                background-color: #ff3b30;
+            }
+            body.dark-mode .delete-btn:hover {
+                background-color: #c62828;
+            }
+            body.dark-mode .empty-state {
+                color: #b0b3b8;
+            }
+            body.dark-mode .highlight {
+                background-color: #3a3b3c;
+            }
     </style>
 </head>
 <body>
+    <!-- 深色模式切换按钮 -->
+    <div style="position: fixed; top: 18px; right: 24px; z-index: 999;">
+        <button id="darkModeToggle" style="padding: 8px 18px; border-radius: 20px; border: none; background: #222; color: #fff; font-size: 15px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">🌙 深色模式</button>
+    </div>
     <div class="container">
         <h1>超级大脑 🚀</h1>
         <p class="subtitle">欢迎使用我的链接收藏工具！在这里整理你的知识。</p>
@@ -334,6 +419,37 @@
             <span id="countLabel" style="color: #0071e3; font-size: 24px; font-weight: 400;"></span>
         </h2>
 
+        <!-- 工具栏 -->
+        <div style="
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        ">
+            <button class="save-btn" id="exportBtn" style="
+                flex: 1;
+                min-width: 140px;
+                background-color: #34c759;
+                margin: 0;
+                padding: 12px 20px;
+                font-size: 15px;
+            ">
+                📤 导出数据
+            </button>
+            <button class="save-btn" id="importBtn" style="
+                flex: 1;
+                min-width: 140px;
+                background-color: #ff9500;
+                margin: 0;
+                padding: 12px 20px;
+                font-size: 15px;
+            ">
+                📥 导入数据
+            </button>
+        </div>
+        <!-- 隐藏的文件输入框（用于导入） -->
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+
         <div id="collections">
             <!-- 标签筛选栏 -->
             <div id="filterBar"></div>
@@ -349,6 +465,30 @@
     </div>
 
     <script>
+        // 深色模式切换逻辑
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        function setDarkMode(enabled) {
+            if (enabled) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.textContent = '☀️ 浅色模式';
+            } else {
+                document.body.classList.remove('dark-mode');
+                darkModeToggle.textContent = '🌙 深色模式';
+            }
+            localStorage.setItem('darkMode', enabled ? '1' : '0');
+        }
+        // 初始化深色模式状态
+        (function() {
+            const saved = localStorage.getItem('darkMode');
+            if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                setDarkMode(true);
+            } else {
+                setDarkMode(false);
+            }
+        })();
+        darkModeToggle.onclick = function() {
+            setDarkMode(!document.body.classList.contains('dark-mode'));
+        };
         // ==========================================
         // 数据和状态
         // ==========================================
@@ -660,6 +800,98 @@
                 .replace(/"/g, '&quot;');
         }
 
+        // ==========================================
+        // 导出数据
+        // ==========================================
+        document.getElementById('exportBtn').onclick = function() {
+            if (links.length === 0) {
+                alert('还没有任何链接可以导出！');
+                return;
+            }
+
+            // 把数据转换为 JSON 字符串（格式化，方便阅读）
+            const jsonData = JSON.stringify(links, null, 2);
+
+            // 创建一个下载链接
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // 自动点击下载
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `超级大脑备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            a.click();
+
+            // 清理
+            URL.revokeObjectURL(url);
+
+            console.log(`✅ 已导出 ${links.length} 个链接`);
+        };
+
+        // ==========================================
+        // 导入数据
+        // ==========================================
+        document.getElementById('importBtn').onclick = function() {
+            document.getElementById('importFile').click();
+        };
+
+        document.getElementById('importFile').onchange = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    // 解析 JSON 文件
+                    const importedLinks = JSON.parse(e.target.result);
+
+                    // 验证数据格式
+                    if (!Array.isArray(importedLinks)) {
+                        alert('文件格式不正确！请选择正确的备份文件。');
+                        return;
+                    }
+
+                    // 询问导入方式
+                    const choice = confirm(
+                        `文件中有 ${importedLinks.length} 个链接\n\n` +
+                        `点击"确定"：合并到现有数据（推荐）\n` +
+                        `点击"取消"：替换所有现有数据`
+                    );
+
+                    if (choice) {
+                        // 合并（避免重复）
+                        let addedCount = 0;
+                        importedLinks.forEach(function(importedLink) {
+                            const exists = links.some(l => l.url === importedLink.url);
+                            if (!exists) {
+                                links.push(importedLink);
+                                addedCount++;
+                            }
+                        });
+                        alert(`✅ 导入完成！新增了 ${addedCount} 个链接`);
+                    } else {
+                        // 替换
+                        links = importedLinks;
+                        alert(`✅ 导入完成！共 ${links.length} 个链接`);
+                    }
+
+                    // 保存并刷新
+                    saveToStorage();
+                    activeFilter = '全部';
+                    renderAll();
+
+                } catch (error) {
+                    alert('文件解析失败！请确认是否为正确的 JSON 备份文件。');
+                    console.error('导入错误：', error);
+                }
+            };
+
+            reader.readAsText(file);
+
+            // 重置文件输入框（允许重复导入同一文件）
+            this.value = '';
+        };
         // ==========================================
         // 初始化
         // ==========================================

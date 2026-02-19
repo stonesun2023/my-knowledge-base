@@ -1014,6 +1014,7 @@
         ========================================== */
         .link-card {
             position: relative; /* 为复选框绝对定位提供基准 */
+            transition: all 0.2s ease, border-left-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .card-checkbox {
@@ -1029,47 +1030,66 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             color: white;
-            transition: all 0.2s ease;
+            /* 淡入/淡出 + 缩放动画 */
+            transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
             opacity: 0;
+            transform: scale(0.8);
             z-index: 10;
             flex-shrink: 0;
             user-select: none;
+            line-height: 1;
         }
 
-        /* 选择模式下或 hover 时显示复选框 */
-        body.selection-mode .card-checkbox,
-        .link-card:hover .card-checkbox {
+        /* 选择模式下显示复选框（淡入） */
+        body.selection-mode .card-checkbox {
             opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 非选择模式下，hover 时也显示复选框 */
+        .link-card:hover .card-checkbox {
+            opacity: 0.7;
+            transform: scale(1);
         }
 
         .card-checkbox:hover {
             border-color: var(--accent-color);
-            transform: scale(1.1);
+            transform: scale(1.15) !important;
+            opacity: 1 !important;
         }
 
         .card-checkbox.checked {
             background: var(--accent-color);
             border-color: var(--accent-color);
-            opacity: 1;
+            opacity: 1 !important;
+            transform: scale(1) !important;
         }
 
         /* 选中状态的卡片 */
         .link-card.selected {
             border-left: 4px solid var(--accent-color);
-            background: var(--tag-bg);
-            box-shadow: 0 0 0 2px var(--accent-color);
+            background: rgba(0, 113, 227, 0.05) !important;
+            box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.35), 0 4px 12px var(--shadow-medium);
         }
 
         body.dark-mode .link-card.selected {
-            background: rgba(10, 132, 255, 0.12);
+            background: rgba(10, 132, 255, 0.10) !important;
+            box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.45), 0 4px 12px var(--shadow-medium);
         }
 
         /* 选择模式下卡片内容左移，为复选框留空间 */
         body.selection-mode .link-card .card-content {
-            padding-left: 32px;
+            padding-left: 36px;
+            transition: padding-left 0.2s ease;
+        }
+
+        /* 选择模式下卡片 hover 效果调整（提示可选择） */
+        body.selection-mode .link-card:not(.selected):hover {
+            border-left-color: var(--accent-color);
+            cursor: pointer;
         }
 
         /* ==========================================
@@ -1087,19 +1107,26 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: nowrap;
             box-shadow: 0 4px 16px var(--shadow-medium);
-            margin-bottom: 16px;
-            /* 初始隐藏，从上方滑入 */
+            /* 初始隐藏：折叠高度 + 透明 + 上移 */
             opacity: 0;
-            transform: translateY(-12px);
+            transform: translateY(-8px);
             pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.25s ease;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out,
+                        max-height 0.3s ease-out, margin-bottom 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+            margin-bottom: 0;
         }
 
         #batchBar.visible {
             opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
+            max-height: 80px;
+            margin-bottom: 16px;
+            overflow: visible;
         }
 
         .batch-count {
@@ -1107,7 +1134,7 @@
             font-weight: 600;
             color: var(--accent-color);
             white-space: nowrap;
-            min-width: 80px;
+            min-width: 90px;
         }
 
         .batch-divider {
@@ -1130,28 +1157,71 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            font-family: inherit;
         }
 
         .batch-btn:hover {
             background: var(--bg-card-hover);
             border-color: var(--accent-color);
             color: var(--accent-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-light);
+        }
+
+        .batch-btn:active {
+            transform: translateY(0);
+        }
+
+        .batch-btn.tag-btn-style {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .batch-btn.tag-btn-style:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: white;
+        }
+
+        .batch-btn.export-btn-style {
+            background: #34c759;
+            color: white;
+            border-color: #34c759;
+        }
+
+        .batch-btn.export-btn-style:hover {
+            background: #2db34a;
+            border-color: #2db34a;
+            color: white;
+        }
+
+        .batch-btn.danger {
+            background: #ff3b30;
+            color: white;
+            border-color: #ff3b30;
         }
 
         .batch-btn.danger:hover {
-            border-color: #ff3b30;
-            color: #ff3b30;
-            background: rgba(255, 59, 48, 0.06);
+            background: #ff2d20;
+            border-color: #ff2d20;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.35);
         }
 
         .batch-btn.cancel {
             margin-left: auto;
             color: var(--text-secondary);
+            background: transparent;
+            border-color: transparent;
         }
 
         .batch-btn.cancel:hover {
             color: var(--text-primary);
             border-color: var(--border-color);
+            background: var(--bg-card);
+            transform: none;
+            box-shadow: none;
         }
 
         /* 标签下拉菜单 */
@@ -1161,30 +1231,38 @@
 
         .batch-tag-menu {
             position: absolute;
-            top: calc(100% + 6px);
+            top: calc(100% + 8px);
             left: 0;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            box-shadow: 0 8px 24px var(--shadow-medium);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px var(--shadow-medium);
             padding: 6px;
-            min-width: 140px;
+            min-width: 160px;
             z-index: 600;
-            display: none;
+            /* 动画 */
+            opacity: 0;
+            transform: translateY(-8px) scale(0.96);
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
         }
 
-        .batch-tag-menu.open { display: block; }
+        .batch-tag-menu.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
 
         .batch-tag-menu-item {
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 9px 14px;
+            border-radius: 8px;
             font-size: 13px;
             cursor: pointer;
             color: var(--text-primary);
-            transition: background 0.15s ease;
+            transition: background 0.15s ease, color 0.15s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .batch-tag-menu-item:hover {
@@ -1192,27 +1270,74 @@
             color: var(--accent-color);
         }
 
+        .batch-tag-menu-item.clear-tag {
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+            padding-top: 10px;
+        }
+
+        .batch-tag-menu-item.clear-tag:hover {
+            color: #ff3b30;
+            background: rgba(255, 59, 48, 0.06);
+        }
+
         /* Toast 提示 */
         #batchToast {
             position: fixed;
             bottom: 70px;
             left: 50%;
-            transform: translateX(-50%) translateY(10px);
-            background: rgba(0, 0, 0, 0.82);
+            transform: translateX(-50%) translateY(16px);
+            background: rgba(30, 30, 30, 0.92);
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 11px 22px;
+            border-radius: 24px;
             font-size: 14px;
             z-index: 9000;
             opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transition: opacity 0.22s ease, transform 0.22s ease;
             pointer-events: none;
             white-space: nowrap;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            max-width: calc(100vw - 40px);
+            text-align: center;
         }
 
         #batchToast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+
+        /* ==========================================
+           响应式 - 批量操作栏移动端
+        ========================================== */
+        @media (max-width: 768px) {
+            .card-checkbox {
+                width: 24px;
+                height: 24px;
+                font-size: 13px;
+            }
+
+            #batchBar {
+                gap: 6px;
+                padding: 0 12px;
+            }
+
+            #batchBar.visible {
+                padding: 8px 12px;
+                min-height: auto;
+            }
+
+            .batch-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .batch-count {
+                font-size: 13px;
+                min-width: 70px;
+            }
         }
 
         /* ==========================================
@@ -1314,8 +1439,17 @@
             <span class="shortcut-desc">搜索</span>
         </div>
         <div class="shortcut-item">
+            <kbd class="kbd" id="kbdModA"></kbd>
+            <kbd class="kbd">A</kbd>
+            <span class="shortcut-desc">全选</span>
+        </div>
+        <div class="shortcut-item">
+            <kbd class="kbd">Del</kbd>
+            <span class="shortcut-desc">删除选中</span>
+        </div>
+        <div class="shortcut-item">
             <kbd class="kbd">ESC</kbd>
-            <span class="shortcut-desc">清空 / 失焦</span>
+            <span class="shortcut-desc">取消选择 / 清空</span>
         </div>
     </div>
 
@@ -1464,7 +1598,7 @@
 
                 <!-- 修改标签下拉 -->
                 <div class="batch-tag-dropdown">
-                    <button class="batch-btn" id="batchTagBtn" onclick="toggleBatchTagMenu()">
+                    <button class="batch-btn tag-btn-style" id="batchTagBtn" onclick="toggleBatchTagMenu()">
                         🏷️ 修改标签 ▾
                     </button>
                     <div class="batch-tag-menu" id="batchTagMenu">
@@ -1475,11 +1609,11 @@
                         <div class="batch-tag-menu-item" onclick="batchSetTag('工作')">💼 工作</div>
                         <div class="batch-tag-menu-item" onclick="batchSetTag('工具')">🔧 工具</div>
                         <div class="batch-tag-menu-item" onclick="batchSetTag('其他')">📌 其他</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('')" style="color:var(--text-secondary)">✕ 清除标签</div>
+                        <div class="batch-tag-menu-item clear-tag" onclick="batchSetTag('')">✕ 清除标签</div>
                     </div>
                 </div>
 
-                <button class="batch-btn" onclick="batchExport()">📤 导出</button>
+                <button class="batch-btn export-btn-style" onclick="batchExport()">📤 导出</button>
                 <button class="batch-btn danger" onclick="batchDelete()">🗑️ 删除</button>
                 <button class="batch-btn cancel" onclick="exitSelectionMode()">✕ 取消选择</button>
             </div>
@@ -1490,42 +1624,324 @@
 
     <script>
         // ==========================================
-        // 主题切换
+        // AppState —— 轻量状态管理器
         // ==========================================
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        const STORAGE_KEY_THEME = 'superBrain_darkMode';
+        const AppState = (function() {
+            const STORAGE_KEY_LINKS  = 'superBrain_links';
+            const STORAGE_KEY_THEME  = 'superBrain_darkMode';
+            const HISTORY_MAX        = 10;   // 最多保留 10 条历史
+            const PERSIST_THROTTLE   = 500;  // 节流保存 ms
 
-        // 加载保存的主题
-        const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-        if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-            themeToggle.textContent = '☀️';
-        }
+            // ---------- 初始数据 ----------
+            const _initLinks = JSON.parse(localStorage.getItem(STORAGE_KEY_LINKS) || '[]');
+            const _initTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'light';
 
-        // 切换主题
-        themeToggle.onclick = function() {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-            themeToggle.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+            // ---------- 核心状态树 ----------
+            let _state = {
+                data: {
+                    links: _initLinks,
+                },
+                filters: {
+                    tag: '全部',
+                    searchKeyword: '',
+                },
+                ui: {
+                    theme: _initTheme,
+                    statsCollapsed: false,
+                    selectionMode: false,
+                    selectedLinks: [],   // realIndex 数组
+                    selectedAddTag: '',
+                },
+            };
+
+            // ---------- 历史记录（仅记录 data.links 变化） ----------
+            const _history = [];   // [{snapshot, action, ts}]
+            let   _historyPos = -1; // 当前位置（-1 = 无历史）
+
+            // ---------- 监听器 ----------
+            const _listeners = [];
+
+            // ---------- 节流持久化 ----------
+            let _persistTimer = null;
+            function _schedulePersist() {
+                clearTimeout(_persistTimer);
+                _persistTimer = setTimeout(_persist, PERSIST_THROTTLE);
+            }
+            function _persist() {
+                localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(_state.data.links));
+                localStorage.setItem(STORAGE_KEY_THEME, _state.ui.theme);
+            }
+
+            // ---------- 深路径读取 ----------
+            function _getByPath(obj, path) {
+                return path.split('.').reduce((o, k) => (o != null ? o[k] : undefined), obj);
+            }
+
+            // ---------- 深路径写入（返回新对象，不可变风格） ----------
+            function _setByPath(obj, path, value) {
+                const keys = path.split('.');
+                const result = Object.assign({}, obj);
+                let cur = result;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    cur[keys[i]] = Object.assign({}, cur[keys[i]]);
+                    cur = cur[keys[i]];
+                }
+                cur[keys[keys.length - 1]] = value;
+                return result;
+            }
+
+            // ---------- 通知所有监听器 ----------
+            function _notify(path, value, prevValue) {
+                _listeners.forEach(fn => {
+                    try { fn(path, value, prevValue, _state); }
+                    catch(e) { console.error('[AppState] listener error:', e); }
+                });
+            }
+
+            // ---------- 推入历史（仅 data.links 变化时） ----------
+            function _pushHistory(action) {
+                // 截断 redo 分支
+                if (_historyPos < _history.length - 1) {
+                    _history.splice(_historyPos + 1);
+                }
+                _history.push({
+                    snapshot: JSON.parse(JSON.stringify(_state.data.links)),
+                    action,
+                    ts: Date.now(),
+                });
+                if (_history.length > HISTORY_MAX) _history.shift();
+                _historyPos = _history.length - 1;
+            }
+
+            // ========== 公开 API ==========
+            return {
+                // 读取状态（支持路径，如 'data.links'）
+                get(path) {
+                    return path ? _getByPath(_state, path) : _state;
+                },
+
+                // 更新状态
+                set(path, value, { persist = true, history = false, action = path } = {}) {
+                    const prevValue = _getByPath(_state, path);
+                    _state = _setByPath(_state, path, value);
+
+                    // 调试日志
+                    console.log(`[AppState] ✏️ ${action}`, { prev: prevValue, next: value });
+
+                    // 历史记录（仅 links 变化）
+                    if (history && path.startsWith('data.links')) {
+                        _pushHistory(action);
+                    }
+
+                    // 持久化
+                    if (persist) _schedulePersist();
+
+                    // 通知
+                    _notify(path, value, prevValue);
+                },
+
+                // 订阅状态变化
+                subscribe(fn) {
+                    _listeners.push(fn);
+                    return () => {
+                        const i = _listeners.indexOf(fn);
+                        if (i > -1) _listeners.splice(i, 1);
+                    };
+                },
+
+                // ---- links 专用操作（自动记录历史） ----
+                setLinks(newLinks, action = 'setLinks') {
+                    this.set('data.links', newLinks, { persist: true, history: true, action });
+                },
+
+                // ---- Undo ----
+                undo() {
+                    if (_historyPos <= 0) {
+                        console.log('[AppState] ↩️ 无可撤销操作');
+                        return false;
+                    }
+                    _historyPos--;
+                    const snap = JSON.parse(JSON.stringify(_history[_historyPos].snapshot));
+                    _state = _setByPath(_state, 'data.links', snap);
+                    _schedulePersist();
+                    _notify('data.links', snap, null);
+                    console.log(`[AppState] ↩️ Undo → ${_history[_historyPos].action}`);
+                    return true;
+                },
+
+                // ---- Redo ----
+                redo() {
+                    if (_historyPos >= _history.length - 1) {
+                        console.log('[AppState] ↪️ 无可重做操作');
+                        return false;
+                    }
+                    _historyPos++;
+                    const snap = JSON.parse(JSON.stringify(_history[_historyPos].snapshot));
+                    _state = _setByPath(_state, 'data.links', snap);
+                    _schedulePersist();
+                    _notify('data.links', snap, null);
+                    console.log(`[AppState] ↪️ Redo → ${_history[_historyPos].action}`);
+                    return true;
+                },
+
+                // ---- 历史记录查看 ----
+                getHistory() { return _history.map((h, i) => ({ ...h, current: i === _historyPos })); },
+
+                // ---- 强制立即持久化 ----
+                flush() { clearTimeout(_persistTimer); _persist(); },
+
+                // ---- 调试：打印完整状态 ----
+                debug() {
+                    console.group('[AppState] 📋 当前状态');
+                    console.log('state:', JSON.parse(JSON.stringify(_state)));
+                    console.log('history:', this.getHistory());
+                    console.groupEnd();
+                },
+            };
+        })();
+
+        // 暴露到全局，方便控制台调试
+        window.AppState = AppState;
+
+        // ==========================================
+        // 兼容层：让旧代码的 links / activeFilter / searchKeyword
+        // 读写都透明地走 AppState
+        // ==========================================
+        // 用 Proxy 代理 links 数组，使 links[i] = x / links.splice 等操作
+        // 自动同步到 AppState（简单实现：每次读取都从 AppState 拿最新值）
+        // 注意：批量操作后需调用 AppState.setLinks() 提交
+
+        // 为简单起见，用 getter/setter 包装常用变量
+        const _compat = {
+            get links()          { return AppState.get('data.links'); },
+            set links(v)         { AppState.setLinks(v, 'compat.links='); },
+            get activeFilter()   { return AppState.get('filters.tag'); },
+            set activeFilter(v)  { AppState.set('filters.tag', v, { persist: false }); },
+            get searchKeyword()  { return AppState.get('filters.searchKeyword'); },
+            set searchKeyword(v) { AppState.set('filters.searchKeyword', v, { persist: false }); },
+            get statsCollapsed() { return AppState.get('ui.statsCollapsed'); },
+            set statsCollapsed(v){ AppState.set('ui.statsCollapsed', v, { persist: false }); },
+            get selectedAddTag() { return AppState.get('ui.selectedAddTag'); },
+            set selectedAddTag(v){ AppState.set('ui.selectedAddTag', v, { persist: false }); },
         };
 
-        // ==========================================
-        // 数据和状态
-        // ==========================================
-        const STORAGE_KEY_LINKS = 'superBrain_links';
-        let links = JSON.parse(localStorage.getItem(STORAGE_KEY_LINKS) || '[]');
-        let selectedAddTag = '';
-        let activeFilter = '全部';
-        let searchKeyword = '';
+        // 用 with(_compat) 会有严格模式问题，改用显式引用
+        // 下面所有代码通过 _compat.xxx 访问，同时保留 links 作为快捷引用
+        // （每次使用前从 _compat 取，避免缓存旧值）
+        function getLinks()         { return _compat.links; }
+        function setLinks(v, act)   { AppState.setLinks(v, act); }
+        function getFilter()        { return _compat.activeFilter; }
+        function setFilter_(v)      { _compat.activeFilter = v; }
+        function getKeyword()       { return _compat.searchKeyword; }
+        function setKeyword(v)      { _compat.searchKeyword = v; }
 
         // ==========================================
-        // 统计面板状态（提前声明，避免 renderAll 调用时未定义）
+        // 统计面板图表实例（非状态，纯 UI）
         // ==========================================
         let tagPieChartInstance = null;
         let weekBarChartInstance = null;
-        let statsCollapsed = false;
+
+        // ==========================================
+        // 批量操作模块（提前定义，供 renderLinkList 使用）
+        // ==========================================
+        const Selection = {
+            mode: false,
+            selected: new Set(),
+            lastIndex: -1,
+            _toastTimer: null,
+
+            enter() {
+                this.mode = true;
+                document.body.classList.add('selection-mode');
+                this._updateBar();
+            },
+
+            exit() {
+                this.mode = false;
+                this.selected.clear();
+                this.lastIndex = -1;
+                document.body.classList.remove('selection-mode');
+                document.querySelectorAll('.link-card.selected').forEach(c => c.classList.remove('selected'));
+                document.querySelectorAll('.card-checkbox.checked').forEach(c => c.classList.remove('checked'));
+                this._updateBar();
+            },
+
+            toggle(realIndex, cardEl) {
+                if (!this.mode) this.enter();
+                const cb = cardEl.querySelector('.card-checkbox');
+                if (this.selected.has(realIndex)) {
+                    this.selected.delete(realIndex);
+                    cardEl.classList.remove('selected');
+                    if (cb) { cb.classList.remove('checked'); cb.textContent = ''; }
+                } else {
+                    this.selected.add(realIndex);
+                    cardEl.classList.add('selected');
+                    if (cb) { cb.classList.add('checked'); cb.textContent = '✓'; }
+                }
+                this.lastIndex = realIndex;
+                this._updateBar();
+                if (this.selected.size === 0) this.exit();
+            },
+
+            selectRange(toIndex, toCardEl) {
+                if (!this.mode) this.enter();
+                const cards = Array.from(document.querySelectorAll('.link-card'));
+                const fromPos = cards.findIndex(c => parseInt(c.dataset.realIndex) === this.lastIndex);
+                const toPos   = cards.findIndex(c => parseInt(c.dataset.realIndex) === toIndex);
+                if (fromPos === -1 || toPos === -1) { this.toggle(toIndex, toCardEl); return; }
+                const start = Math.min(fromPos, toPos);
+                const end   = Math.max(fromPos, toPos);
+                for (let i = start; i <= end; i++) {
+                    const card = cards[i];
+                    const idx  = parseInt(card.dataset.realIndex);
+                    const cb   = card.querySelector('.card-checkbox');
+                    this.selected.add(idx);
+                    card.classList.add('selected');
+                    if (cb) { cb.classList.add('checked'); cb.textContent = '✓'; }
+                }
+                this.lastIndex = toIndex;
+                this._updateBar();
+            },
+
+            selectAll() {
+                if (!this.mode) this.enter();
+                document.querySelectorAll('.link-card').forEach(card => {
+                    const idx = parseInt(card.dataset.realIndex);
+                    const cb  = card.querySelector('.card-checkbox');
+                    if (!isNaN(idx)) {
+                        this.selected.add(idx);
+                        card.classList.add('selected');
+                        if (cb) { cb.classList.add('checked'); cb.textContent = '✓'; }
+                    }
+                });
+                this._updateBar();
+            },
+
+            _updateBar() {
+                const bar     = document.getElementById('batchBar');
+                const countEl = document.getElementById('batchCount');
+                const n = this.selected.size;
+                if (n > 0) {
+                    bar.classList.add('visible');
+                    countEl.textContent = `已选 ${n} 个链接`;
+                } else {
+                    bar.classList.remove('visible');
+                }
+            },
+
+            toast(msg, duration = 2500) {
+                const el = document.getElementById('batchToast');
+                el.textContent = msg;
+                el.classList.add('show');
+                clearTimeout(this._toastTimer);
+                this._toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+            },
+
+            getSelectedLinks() {
+                const links = AppState.get('data.links');
+                return Array.from(this.selected).map(i => links[i]).filter(Boolean);
+            }
+        };
 
         const CHART_COLORS = [
             '#0071e3', '#34c759', '#ff9500', '#ff3b30',
@@ -1534,41 +1950,64 @@
         ];
 
         // ==========================================
+        // 主题切换（接入 AppState）
+        // ==========================================
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // 从 AppState 恢复主题
+        if (AppState.get('ui.theme') === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        themeToggle.onclick = function() {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            AppState.set('ui.theme', isDark ? 'dark' : 'light', { persist: true, action: 'theme.toggle' });
+            if (!AppState.get('ui.statsCollapsed')) {
+                setTimeout(renderStats, 50);
+            }
+        };
+
+        // ==========================================
         // 获取 DOM 元素
         // ==========================================
-        const inputUrl = document.getElementById('inputUrl');
+        const inputUrl   = document.getElementById('inputUrl');
         const inputTitle = document.getElementById('inputTitle');
-        const inputNote = document.getElementById('inputNote');
-        const saveBtn = document.getElementById('saveBtn');
+        const inputNote  = document.getElementById('inputNote');
+        const saveBtn    = document.getElementById('saveBtn');
         const addTagButtons = document.querySelectorAll('#addTagButtons .tag-btn');
         const countLabel = document.getElementById('countLabel');
-        const filterBar = document.getElementById('filterBar');
+        const filterBar  = document.getElementById('filterBar');
         const searchInput = document.getElementById('searchInput');
-        const linkList = document.getElementById('linkList');
+        const linkList   = document.getElementById('linkList');
 
         // ==========================================
         // 添加表单 - 标签选择
         // ==========================================
         addTagButtons.forEach(function(btn) {
             btn.onclick = function() {
-                if (selectedAddTag === this.dataset.tag) {
-                    selectedAddTag = '';
+                const cur = AppState.get('ui.selectedAddTag');
+                if (cur === this.dataset.tag) {
+                    AppState.set('ui.selectedAddTag', '', { persist: false });
                     this.classList.remove('selected');
                 } else {
                     addTagButtons.forEach(b => b.classList.remove('selected'));
-                    selectedAddTag = this.dataset.tag;
+                    AppState.set('ui.selectedAddTag', this.dataset.tag, { persist: false });
                     this.classList.add('selected');
                 }
             };
         });
 
         // ==========================================
-        // 保存链接
+        // 保存链接（通过 AppState）
         // ==========================================
         saveBtn.onclick = function() {
-            const url = inputUrl.value.trim();
+            const url   = inputUrl.value.trim();
             const title = inputTitle.value.trim();
-            const note = inputNote.value.trim();
+            const note  = inputNote.value.trim();
 
             if (!url || !title) {
                 alert('请至少填写链接和标题！');
@@ -1577,43 +2016,35 @@
 
             const newLink = {
                 id: Date.now(),
-                url: url,
-                title: title,
-                note: note,
-                tag: selectedAddTag,
-                time: new Date().toLocaleString('zh-CN')
+                url,
+                title,
+                note,
+                tag: AppState.get('ui.selectedAddTag'),
+                time: new Date().toLocaleString('zh-CN'),
             };
 
-            links.unshift(newLink);
-            saveToStorage();
+            const newLinks = [newLink, ...AppState.get('data.links')];
+            AppState.setLinks(newLinks, 'addLink');
 
             inputUrl.value = '';
             inputTitle.value = '';
             inputNote.value = '';
-            selectedAddTag = '';
+            AppState.set('ui.selectedAddTag', '', { persist: false });
             addTagButtons.forEach(b => b.classList.remove('selected'));
-
-            activeFilter = '全部';
+            AppState.set('filters.tag', '全部', { persist: false });
+            AppState.set('filters.searchKeyword', '', { persist: false });
             searchInput.value = '';
-            searchKeyword = '';
 
             renderAll();
         };
 
         // ==========================================
-        // 搜索
+        // 搜索（通过 AppState）
         // ==========================================
         searchInput.oninput = function() {
-            searchKeyword = this.value.trim().toLowerCase();
+            AppState.set('filters.searchKeyword', this.value.trim().toLowerCase(), { persist: false });
             renderLinkList();
         };
-
-        // ==========================================
-        // 保存到 localStorage
-        // ==========================================
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(links));
-        }
 
         // ==========================================
         // 渲染所有
@@ -1621,8 +2052,7 @@
         function renderAll() {
             renderFilterBar();
             renderLinkList();
-            // 同步刷新统计面板（statsCollapsed 在统计面板初始化后才有值，做兼容处理）
-            if (typeof statsCollapsed !== 'undefined' && !statsCollapsed) {
+            if (!AppState.get('ui.statsCollapsed')) {
                 renderStats();
             }
         }
@@ -1631,32 +2061,23 @@
         // 渲染标签筛选栏
         // ==========================================
         function renderFilterBar() {
-            const usedTags = [];
+            const links      = AppState.get('data.links');
+            const activeFilter = AppState.get('filters.tag');
+            const usedTags   = [];
             links.forEach(function(link) {
-                if (link.tag && !usedTags.includes(link.tag)) {
-                    usedTags.push(link.tag);
-                }
+                if (link.tag && !usedTags.includes(link.tag)) usedTags.push(link.tag);
             });
 
-            if (usedTags.length === 0) {
-                filterBar.innerHTML = '';
-                return;
-            }
+            if (usedTags.length === 0) { filterBar.innerHTML = ''; return; }
 
             let html = '';
             const allClass = activeFilter === '全部' ? 'tag-btn selected' : 'tag-btn';
-            html += `<button class="${allClass}" onclick="setFilter('全部')">
-                        📚 全部（${links.length}）
-                     </button>`;
-
+            html += `<button class="${allClass}" onclick="setFilter('全部')">📚 全部（${links.length}）</button>`;
             usedTags.forEach(function(tag) {
                 const count = links.filter(l => l.tag === tag).length;
                 const btnClass = activeFilter === tag ? 'tag-btn selected' : 'tag-btn';
-                html += `<button class="${btnClass}" onclick="setFilter('${tag}')">
-                            🏷️ ${tag}（${count}）
-                         </button>`;
+                html += `<button class="${btnClass}" onclick="setFilter('${tag}')">🏷️ ${tag}（${count}）</button>`;
             });
-
             filterBar.innerHTML = html;
         }
 
@@ -1664,139 +2085,133 @@
         // 设置筛选标签
         // ==========================================
         function setFilter(tag) {
-            activeFilter = tag;
+            AppState.set('filters.tag', tag, { persist: false, action: 'filter.setTag' });
+            AppState.set('filters.searchKeyword', '', { persist: false });
             searchInput.value = '';
-            searchKeyword = '';
             renderAll();
         }
 
         // ==========================================
-        // 渲染链接列表
+        // 渲染链接列表（含批量操作复选框）
         // ==========================================
         function renderLinkList() {
-            updateCount();
+            const links        = AppState.get('data.links');
+            const activeFilter = AppState.get('filters.tag');
+            const searchKeyword = AppState.get('filters.searchKeyword');
+            updateCount(links, activeFilter, searchKeyword);
 
             let result = links;
-            if (activeFilter !== '全部') {
-                result = links.filter(l => l.tag === activeFilter);
-            }
-
+            if (activeFilter !== '全部') result = links.filter(l => l.tag === activeFilter);
             if (searchKeyword) {
                 result = result.filter(function(link) {
                     return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
-                           (link.url && link.url.toLowerCase().includes(searchKeyword)) ||
-                           (link.note && link.note.toLowerCase().includes(searchKeyword));
+                           (link.url   && link.url.toLowerCase().includes(searchKeyword))   ||
+                           (link.note  && link.note.toLowerCase().includes(searchKeyword));
                 });
             }
 
             if (result.length === 0) {
-                if (links.length === 0) {
-                    linkList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📚</div>
-                            <p class="empty-title">还没有任何收藏</p>
-                            <p class="empty-desc">点击上方按钮，开始整理你的知识库吧！</p>
-                        </div>`;
-                } else {
-                    linkList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">🔍</div>
-                            <p class="empty-title">没有找到匹配的链接</p>
-                            <p class="empty-desc">试试其他关键词或标签～</p>
-                        </div>`;
-                }
+                linkList.innerHTML = links.length === 0
+                    ? `<div class="empty-state"><div class="empty-icon">📚</div>
+                       <p class="empty-title">还没有任何收藏</p>
+                       <p class="empty-desc">点击上方按钮，开始整理你的知识库吧！</p></div>`
+                    : `<div class="empty-state"><div class="empty-icon">🔍</div>
+                       <p class="empty-title">没有找到匹配的链接</p>
+                       <p class="empty-desc">试试其他关键词或标签～</p></div>`;
                 return;
             }
 
             let html = '';
             result.forEach(function(link) {
                 const realIndex = links.indexOf(link);
-                const tagHTML = link.tag
-                    ? `<span class="card-tag">🏷️ ${link.tag}</span>`
-                    : '';
-
+                const isSelected = Selection.selected.has(realIndex);
+                const tagHTML = link.tag ? `<span class="card-tag">🏷️ ${link.tag}</span>` : '';
                 const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
-                const url = searchKeyword ? highlight(link.url, searchKeyword) : escapeHTML(link.url);
-                const note = searchKeyword ? highlight(link.note, searchKeyword) : escapeHTML(link.note);
+                const url   = searchKeyword ? highlight(link.url,   searchKeyword) : escapeHTML(link.url);
+                const note  = searchKeyword ? highlight(link.note,  searchKeyword) : escapeHTML(link.note);
 
                 html += `
-                    <div class="link-card">
-                        <h3>📎 ${title}</h3>
-                        <p class="link-url">
-                            🔗 <a href="${escapeHTML(link.url)}" target="_blank">${url}</a>
-                        </p>
-                        <p class="link-note">📝 ${note || '（无笔记）'}</p>
-                        ${tagHTML}
-                        <p class="link-time">🕒 ${link.time}</p>
-                        <div class="card-actions">
-                            <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
-                            <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                    <div class="link-card${isSelected ? ' selected' : ''}" data-real-index="${realIndex}">
+                        <div class="card-checkbox${isSelected ? ' checked' : ''}"
+                             onclick="handleCheckboxClick(event, ${realIndex}, this.closest('.link-card'))">
+                            ${isSelected ? '✓' : ''}
+                        </div>
+                        <div class="card-content">
+                            <h3>📎 ${title}</h3>
+                            <p class="link-url">🔗 <a href="${escapeHTML(link.url)}" target="_blank">${url}</a></p>
+                            <p class="link-note">📝 ${note || '（无笔记）'}</p>
+                            ${tagHTML}
+                            <p class="link-time">🕒 ${link.time}</p>
+                            <div class="card-actions">
+                                <button class="edit-btn"   onclick="editLink(${realIndex})">✏️ 编辑</button>
+                                <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                            </div>
                         </div>
                     </div>`;
             });
-
             linkList.innerHTML = html;
 
-            // 通知链接预览模块重新绑定预加载观察器
-            if (window.LinkPreview) {
-                window.LinkPreview.rebindPreloader();
-            }
+            if (window.LinkPreview) window.LinkPreview.rebindPreloader();
         }
 
         // ==========================================
         // 更新计数
         // ==========================================
-        function updateCount() {
+        function updateCount(links, activeFilter, searchKeyword) {
+            // 支持无参调用（从 AppState 读取）
+            if (links === undefined) {
+                links        = AppState.get('data.links');
+                activeFilter = AppState.get('filters.tag');
+                searchKeyword = AppState.get('filters.searchKeyword');
+            }
             let filtered = links;
-            if (activeFilter !== '全部') {
-                filtered = links.filter(l => l.tag === activeFilter);
-            }
+            if (activeFilter !== '全部') filtered = links.filter(l => l.tag === activeFilter);
             if (searchKeyword) {
-                filtered = filtered.filter(function(link) {
-                    return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
-                           (link.url && link.url.toLowerCase().includes(searchKeyword)) ||
-                           (link.note && link.note.toLowerCase().includes(searchKeyword));
-                });
+                filtered = filtered.filter(l =>
+                    (l.title && l.title.toLowerCase().includes(searchKeyword)) ||
+                    (l.url   && l.url.toLowerCase().includes(searchKeyword))   ||
+                    (l.note  && l.note.toLowerCase().includes(searchKeyword))
+                );
             }
-
-            if (filtered.length === links.length) {
-                countLabel.textContent = `（共 ${links.length} 个）`;
-            } else {
-                countLabel.textContent = `（共 ${links.length} 个，显示 ${filtered.length} 个）`;
-            }
+            countLabel.textContent = filtered.length === links.length
+                ? `（共 ${links.length} 个）`
+                : `（共 ${links.length} 个，显示 ${filtered.length} 个）`;
         }
 
         // ==========================================
-        // 删除链接
+        // 删除链接（通过 AppState）
         // ==========================================
         function deleteLink(index) {
-            const link = links[index];
+            const links = AppState.get('data.links');
+            const link  = links[index];
+            if (!link) return;
             if (confirm(`确定要删除这个链接吗？\n\n📎 ${link.title}`)) {
-                links.splice(index, 1);
-                saveToStorage();
-                activeFilter = '全部';
+                const newLinks = links.filter((_, i) => i !== index);
+                AppState.setLinks(newLinks, 'deleteLink');
+                AppState.set('filters.tag', '全部', { persist: false });
                 renderAll();
             }
         }
 
         // ==========================================
-        // 编辑链接
+        // 编辑链接（通过 AppState）
         // ==========================================
         function editLink(index) {
-            const link = links[index];
+            const links = AppState.get('data.links');
+            const link  = links[index];
+            if (!link) return;
 
-            inputUrl.value = link.url;
+            inputUrl.value   = link.url;
             inputTitle.value = link.title;
-            inputNote.value = link.note || '';
+            inputNote.value  = link.note || '';
 
-            selectedAddTag = link.tag || '';
-            addTagButtons.forEach(function(btn) {
-                btn.classList.toggle('selected', btn.dataset.tag === selectedAddTag);
-            });
+            const tag = link.tag || '';
+            AppState.set('ui.selectedAddTag', tag, { persist: false });
+            addTagButtons.forEach(btn => btn.classList.toggle('selected', btn.dataset.tag === tag));
 
-            links.splice(index, 1);
-            saveToStorage();
-            activeFilter = '全部';
+            const newLinks = links.filter((_, i) => i !== index);
+            AppState.setLinks(newLinks, 'editLink.remove');
+            AppState.set('filters.tag', '全部', { persist: false });
             renderAll();
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1827,28 +2242,22 @@
         }
 
         // ==========================================
-        // 导出数据
+        // 导出数据（通过 AppState）
         // ==========================================
         document.getElementById('exportBtn').onclick = function() {
-            if (links.length === 0) {
-                alert('还没有任何链接可以导出！');
-                return;
-            }
-
-            const jsonData = JSON.stringify(links, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
+            const links = AppState.get('data.links');
+            if (links.length === 0) { alert('还没有任何链接可以导出！'); return; }
+            const blob = new Blob([JSON.stringify(links, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-
             const a = document.createElement('a');
             a.href = url;
             a.download = `超级大脑备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
             a.click();
-
             URL.revokeObjectURL(url);
         };
 
         // ==========================================
-        // 导入数据
+        // 导入数据（通过 AppState）
         // ==========================================
         document.getElementById('importBtn').onclick = function() {
             document.getElementById('importFile').click();
@@ -1857,48 +2266,36 @@
         document.getElementById('importFile').onchange = function(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-
             reader.onload = function(e) {
                 try {
                     const importedLinks = JSON.parse(e.target.result);
-
                     if (!Array.isArray(importedLinks)) {
                         alert('文件格式不正确！请选择正确的备份文件。');
                         return;
                     }
-
                     const choice = confirm(
                         `文件中有 ${importedLinks.length} 个链接\n\n` +
                         `点击"确定"：合并到现有数据（推荐）\n` +
                         `点击"取消"：替换所有现有数据`
                     );
-
+                    let newLinks;
                     if (choice) {
-                        let addedCount = 0;
-                        importedLinks.forEach(function(importedLink) {
-                            const exists = links.some(l => l.url === importedLink.url);
-                            if (!exists) {
-                                links.push(importedLink);
-                                addedCount++;
-                            }
-                        });
-                        alert(`✅ 导入完成！新增了 ${addedCount} 个链接`);
+                        const cur = AppState.get('data.links');
+                        const added = importedLinks.filter(il => !cur.some(l => l.url === il.url));
+                        newLinks = [...cur, ...added];
+                        alert(`✅ 导入完成！新增了 ${added.length} 个链接`);
                     } else {
-                        links = importedLinks;
-                        alert(`✅ 导入完成！共 ${links.length} 个链接`);
+                        newLinks = importedLinks;
+                        alert(`✅ 导入完成！共 ${newLinks.length} 个链接`);
                     }
-
-                    saveToStorage();
-                    activeFilter = '全部';
+                    AppState.setLinks(newLinks, 'importLinks');
+                    AppState.set('filters.tag', '全部', { persist: false });
                     renderAll();
-
                 } catch (error) {
                     alert('文件解析失败！请确认是否为正确的 JSON 备份文件。');
                 }
             };
-
             reader.readAsText(file);
             this.value = '';
         };
@@ -1978,81 +2375,70 @@
         // 初始化
         // ==========================================
         renderAll();
-        console.log(`🚀 超级大脑已加载！共 ${links.length} 个链接`);
+        console.log(`🚀 超级大脑已加载！共 ${AppState.get('data.links').length} 个链接`);
 
         // ==========================================
-        // 折叠/展开统计面板
+        // 折叠/展开统计面板（通过 AppState）
         // ==========================================
         document.getElementById('statsHeader').onclick = function() {
-            statsCollapsed = !statsCollapsed;
+            const collapsed = !AppState.get('ui.statsCollapsed');
+            AppState.set('ui.statsCollapsed', collapsed, { persist: false });
             const statsBody = document.getElementById('statsBody');
             const toggleIcon = document.getElementById('statsToggleIcon');
-            if (statsCollapsed) {
+            if (collapsed) {
                 statsBody.classList.add('collapsed');
                 toggleIcon.classList.add('collapsed');
             } else {
                 statsBody.classList.remove('collapsed');
                 toggleIcon.classList.remove('collapsed');
-                // 展开时重新渲染图表（避免尺寸问题）
                 setTimeout(renderStats, 50);
             }
         };
 
         // ==========================================
-        // 计算统计数据
+        // 计算统计数据（从 AppState 读取）
         // ==========================================
         function calcStats() {
-            // 总链接数
+            const links = AppState.get('data.links');
             const totalLinks = links.length;
 
-            // 各标签数量
             const tagMap = {};
             links.forEach(function(link) {
                 const tag = link.tag || '未分类';
                 tagMap[tag] = (tagMap[tag] || 0) + 1;
             });
 
-            // 标签种类数（不含"未分类"）
             const taggedCount = Object.keys(tagMap).filter(t => t !== '未分类').length;
 
-            // 最近7天新增
             const now = new Date();
             const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const recentLinks = links.filter(function(link) {
                 if (!link.time) return false;
-                // 尝试解析时间字符串
                 const t = new Date(link.time);
                 if (isNaN(t.getTime())) {
-                    // 兼容中文格式 "2026/2/18 17:30:00"
-                    const cleaned = link.time.replace(/\//g, '-');
-                    const t2 = new Date(cleaned);
+                    const t2 = new Date(link.time.replace(/\//g, '-'));
                     return !isNaN(t2.getTime()) && t2 >= sevenDaysAgo;
                 }
                 return t >= sevenDaysAgo;
             }).length;
 
-            // 最常用标签（排除"未分类"）
             const sortedTags = Object.entries(tagMap)
                 .filter(([tag]) => tag !== '未分类')
                 .sort((a, b) => b[1] - a[1]);
             const topTag = sortedTags.length > 0 ? sortedTags[0][0] : '—';
 
-            // 近7天每天数量（用于折线/柱状图）
             const weekDays = [];
             const weekCounts = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(now);
                 d.setDate(d.getDate() - i);
-                const label = `${d.getMonth() + 1}/${d.getDate()}`;
-                weekDays.push(label);
+                weekDays.push(`${d.getMonth() + 1}/${d.getDate()}`);
                 const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+                const dayEnd   = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
                 const count = links.filter(function(link) {
                     if (!link.time) return false;
                     let t = new Date(link.time);
-                    if (isNaN(t.getTime())) {
-                        t = new Date(link.time.replace(/\//g, '-'));
-                    }
+                    if (isNaN(t.getTime())) t = new Date(link.time.replace(/\//g, '-'));
                     return !isNaN(t.getTime()) && t >= dayStart && t < dayEnd;
                 }).length;
                 weekCounts.push(count);
@@ -2292,23 +2678,7 @@
         }
 
         // ==========================================
-        // 主题切换时同步更新图表颜色
-        // ==========================================
-        const _origThemeToggle = themeToggle.onclick;
-        themeToggle.onclick = function() {
-            _origThemeToggle.call(this);
-            if (!statsCollapsed) {
-                setTimeout(renderStats, 50);
-            }
-        };
-
-        // ==========================================
-        // 初始化统计面板
-        // ==========================================
-        renderStats();
-
-        // ==========================================
-        // 键盘快捷键
+        // 初始化统计面板（已在 renderAll 中调用，此处仅补充快捷键初始化）
         // ==========================================
 
         // 动态设置修饰键显示（Mac 显示 ⌘，Windows 显示 Ctrl）
@@ -2317,6 +2687,7 @@
             const modLabel = isMac ? '⌘' : 'Ctrl';
             document.getElementById('kbdModK').textContent = modLabel;
             document.getElementById('kbdModF').textContent = modLabel;
+            document.getElementById('kbdModA').textContent = modLabel;
         })();
 
         // 视觉反馈：输入框闪烁动画
@@ -2343,150 +2714,34 @@
             searchInput.focus();
             searchInput.select();
             flashElement(searchInput);
-            // 平滑滚动到搜索框位置
             searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // 聚焦 URL 输入框
+        // 聚焦 URL 输入框（通过 AppState 折叠统计面板）
         function focusUrlInput() {
-            // 折叠统计面板（如果展开）
-            if (!statsCollapsed) {
-                statsCollapsed = true;
+            if (!AppState.get('ui.statsCollapsed')) {
+                AppState.set('ui.statsCollapsed', true, { persist: false });
                 document.getElementById('statsBody').classList.add('collapsed');
                 document.getElementById('statsToggleIcon').classList.add('collapsed');
             }
-            // 滚动到顶部
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            // 延迟聚焦（等待滚动）
             setTimeout(function() {
                 inputUrl.focus();
                 flashElement(inputUrl);
             }, 200);
         }
 
-        // 清空搜索
+        // 清空搜索（通过 AppState）
         function clearSearch() {
-            if (searchKeyword) {
+            const kw = AppState.get('filters.searchKeyword');
+            if (kw) {
                 searchInput.value = '';
-                searchKeyword = '';
+                AppState.set('filters.searchKeyword', '', { persist: false });
                 renderLinkList();
                 flashElement(searchInput);
             }
             searchInput.blur();
         }
-
-        // ==========================================
-        // 批量操作模块
-        // ==========================================
-        const Selection = {
-            // 状态
-            mode: false,           // 是否处于选择模式
-            selected: new Set(),   // 选中的链接 realIndex 集合
-            lastIndex: -1,         // 上次点击的 index（用于 Shift 连续选择）
-            _toastTimer: null,
-
-            // 进入选择模式
-            enter() {
-                this.mode = true;
-                document.body.classList.add('selection-mode');
-                this._updateBar();
-            },
-
-            // 退出选择模式
-            exit() {
-                this.mode = false;
-                this.selected.clear();
-                this.lastIndex = -1;
-                document.body.classList.remove('selection-mode');
-                // 清除所有卡片选中状态
-                document.querySelectorAll('.link-card.selected').forEach(c => c.classList.remove('selected'));
-                document.querySelectorAll('.card-checkbox.checked').forEach(c => c.classList.remove('checked'));
-                this._updateBar();
-            },
-
-            // 切换单个链接选中状态
-            toggle(realIndex, cardEl) {
-                if (!this.mode) this.enter();
-                if (this.selected.has(realIndex)) {
-                    this.selected.delete(realIndex);
-                    cardEl.classList.remove('selected');
-                    cardEl.querySelector('.card-checkbox').classList.remove('checked');
-                } else {
-                    this.selected.add(realIndex);
-                    cardEl.classList.add('selected');
-                    cardEl.querySelector('.card-checkbox').classList.add('checked');
-                }
-                this.lastIndex = realIndex;
-                this._updateBar();
-                // 如果全部取消选中，退出选择模式
-                if (this.selected.size === 0) this.exit();
-            },
-
-            // 连续选择（Shift+点击）
-            selectRange(toIndex, toCardEl) {
-                if (!this.mode) this.enter();
-                const cards = Array.from(document.querySelectorAll('.link-card'));
-                // 找到 lastIndex 对应的卡片位置
-                const fromPos = cards.findIndex(c => parseInt(c.dataset.realIndex) === this.lastIndex);
-                const toPos = cards.findIndex(c => parseInt(c.dataset.realIndex) === toIndex);
-                if (fromPos === -1 || toPos === -1) {
-                    this.toggle(toIndex, toCardEl);
-                    return;
-                }
-                const start = Math.min(fromPos, toPos);
-                const end = Math.max(fromPos, toPos);
-                for (let i = start; i <= end; i++) {
-                    const card = cards[i];
-                    const idx = parseInt(card.dataset.realIndex);
-                    this.selected.add(idx);
-                    card.classList.add('selected');
-                    card.querySelector('.card-checkbox').classList.add('checked');
-                }
-                this.lastIndex = toIndex;
-                this._updateBar();
-            },
-
-            // 全选当前可见链接
-            selectAll() {
-                if (!this.mode) this.enter();
-                document.querySelectorAll('.link-card').forEach(card => {
-                    const idx = parseInt(card.dataset.realIndex);
-                    if (!isNaN(idx)) {
-                        this.selected.add(idx);
-                        card.classList.add('selected');
-                        card.querySelector('.card-checkbox').classList.add('checked');
-                    }
-                });
-                this._updateBar();
-            },
-
-            // 更新操作栏
-            _updateBar() {
-                const bar = document.getElementById('batchBar');
-                const countEl = document.getElementById('batchCount');
-                const n = this.selected.size;
-                if (n > 0) {
-                    bar.classList.add('visible');
-                    countEl.textContent = `已选 ${n} 个链接`;
-                } else {
-                    bar.classList.remove('visible');
-                }
-            },
-
-            // Toast 提示
-            toast(msg, duration = 2500) {
-                const el = document.getElementById('batchToast');
-                el.textContent = msg;
-                el.classList.add('show');
-                clearTimeout(this._toastTimer);
-                this._toastTimer = setTimeout(() => el.classList.remove('show'), duration);
-            },
-
-            // 获取选中的链接对象数组
-            getSelectedLinks() {
-                return Array.from(this.selected).map(i => links[i]).filter(Boolean);
-            }
-        };
 
         // 退出选择模式（供 HTML onclick 调用）
         function exitSelectionMode() {
@@ -2498,6 +2753,46 @@
             document.getElementById('batchTagMenu').classList.toggle('open');
         }
 
+        // ==========================================
+        // 卡片点击事件委托（支持选择模式下点击卡片选中）
+        // ==========================================
+        document.getElementById('linkList').addEventListener('click', function(e) {
+            // 如果点击的是按钮、链接、复选框，不处理
+            if (e.target.closest('.card-actions') ||
+                e.target.closest('a') ||
+                e.target.closest('.card-checkbox')) {
+                return;
+            }
+
+            const card = e.target.closest('.link-card');
+            if (!card) return;
+
+            const realIndex = parseInt(card.dataset.realIndex);
+            if (isNaN(realIndex)) return;
+
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+            // Ctrl/Cmd + 点击：累加选择（无论是否在选择模式）
+            if (modKey) {
+                e.preventDefault();
+                Selection.toggle(realIndex, card);
+                return;
+            }
+
+            // Shift + 点击：连续选择
+            if (e.shiftKey && Selection.lastIndex !== -1) {
+                e.preventDefault();
+                Selection.selectRange(realIndex, card);
+                return;
+            }
+
+            // 选择模式下普通点击卡片：切换选中
+            if (Selection.mode) {
+                Selection.toggle(realIndex, card);
+            }
+        });
+
         // 点击其他地方关闭下拉菜单
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.batch-tag-dropdown')) {
@@ -2505,21 +2800,27 @@
             }
         });
 
-        // 批量修改标签
+        // 批量修改标签（通过 AppState）
         function batchSetTag(tag) {
             document.getElementById('batchTagMenu').classList.remove('open');
             const n = Selection.selected.size;
             if (n === 0) return;
-            Selection.selected.forEach(i => { if (links[i]) links[i].tag = tag; });
-            saveToStorage();
+            // 保存当前选中集合（renderAll 不会清除 Selection.selected）
+            const savedSelected = new Set(Selection.selected);
+            const links = AppState.get('data.links');
+            const newLinks = links.map((link, i) =>
+                savedSelected.has(i) ? Object.assign({}, link, { tag }) : link
+            );
+            AppState.setLinks(newLinks, 'batchSetTag');
             renderAll();
-            // 重新恢复选中状态（renderAll 会重建 DOM）
+            // 重新恢复选中状态（renderAll 会重建 DOM，需要重新标记 class 和文字）
             setTimeout(() => {
-                Selection.selected.forEach(i => {
+                savedSelected.forEach(i => {
                     const card = document.querySelector(`.link-card[data-real-index="${i}"]`);
                     if (card) {
                         card.classList.add('selected');
-                        card.querySelector('.card-checkbox').classList.add('checked');
+                        const cb = card.querySelector('.card-checkbox');
+                        if (cb) { cb.classList.add('checked'); cb.textContent = '✓'; }
                     }
                 });
                 Selection._updateBar();
@@ -2528,12 +2829,12 @@
             Selection.toast(`✅ 已将 ${n} 个链接的标签改为「${tagLabel}」`);
         }
 
-        // 批量导出
+        // 批量导出（通过 AppState）
         function batchExport() {
-            const selected = Selection.getSelectedLinks();
+            const links = AppState.get('data.links');
+            const selected = Array.from(Selection.selected).map(i => links[i]).filter(Boolean);
             if (selected.length === 0) return;
-            const jsonData = JSON.stringify(selected, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(selected, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2543,99 +2844,18 @@
             Selection.toast(`📤 已导出 ${selected.length} 个链接`);
         }
 
-        // 批量删除
+        // 批量删除（通过 AppState）
         function batchDelete() {
             const n = Selection.selected.size;
             if (n === 0) return;
             if (!confirm(`确定删除 ${n} 个选中的链接吗？\n\n此操作不可撤销。`)) return;
-            // 从大到小删除，避免索引偏移
-            const indices = Array.from(Selection.selected).sort((a, b) => b - a);
-            indices.forEach(i => links.splice(i, 1));
-            saveToStorage();
+            const links = AppState.get('data.links');
+            const newLinks = links.filter((_, i) => !Selection.selected.has(i));
+            AppState.setLinks(newLinks, 'batchDelete');
             Selection.exit();
             renderAll();
             Selection.toast(`🗑️ 已删除 ${n} 个链接`);
         }
-
-        // ==========================================
-        // 修改 renderLinkList：添加复选框 + data-real-index
-        // ==========================================
-        // 重写 renderLinkList，加入批量操作支持
-        const _origRenderLinkList = renderLinkList;
-        renderLinkList = function() {
-            updateCount();
-
-            let result = links;
-            if (activeFilter !== '全部') {
-                result = links.filter(l => l.tag === activeFilter);
-            }
-            if (searchKeyword) {
-                result = result.filter(function(link) {
-                    return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
-                           (link.url && link.url.toLowerCase().includes(searchKeyword)) ||
-                           (link.note && link.note.toLowerCase().includes(searchKeyword));
-                });
-            }
-
-            if (result.length === 0) {
-                if (links.length === 0) {
-                    linkList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📚</div>
-                            <p class="empty-title">还没有任何收藏</p>
-                            <p class="empty-desc">点击上方按钮，开始整理你的知识库吧！</p>
-                        </div>`;
-                } else {
-                    linkList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">🔍</div>
-                            <p class="empty-title">没有找到匹配的链接</p>
-                            <p class="empty-desc">试试其他关键词或标签～</p>
-                        </div>`;
-                }
-                return;
-            }
-
-            let html = '';
-            result.forEach(function(link) {
-                const realIndex = links.indexOf(link);
-                const isSelected = Selection.selected.has(realIndex);
-                const tagHTML = link.tag
-                    ? `<span class="card-tag">🏷️ ${link.tag}</span>`
-                    : '';
-                const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
-                const url = searchKeyword ? highlight(link.url, searchKeyword) : escapeHTML(link.url);
-                const note = searchKeyword ? highlight(link.note, searchKeyword) : escapeHTML(link.note);
-
-                html += `
-                    <div class="link-card${isSelected ? ' selected' : ''}"
-                         data-real-index="${realIndex}">
-                        <div class="card-checkbox${isSelected ? ' checked' : ''}"
-                             onclick="handleCheckboxClick(event, ${realIndex}, this.closest('.link-card'))">
-                            ${isSelected ? '✓' : ''}
-                        </div>
-                        <div class="card-content">
-                            <h3>📎 ${title}</h3>
-                            <p class="link-url">
-                                🔗 <a href="${escapeHTML(link.url)}" target="_blank">${url}</a>
-                            </p>
-                            <p class="link-note">📝 ${note || '（无笔记）'}</p>
-                            ${tagHTML}
-                            <p class="link-time">🕒 ${link.time}</p>
-                            <div class="card-actions">
-                                <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
-                                <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-
-            linkList.innerHTML = html;
-
-            if (window.LinkPreview) {
-                window.LinkPreview.rebindPreloader();
-            }
-        };
 
         // 复选框点击处理（支持 Ctrl/Shift 多选）
         function handleCheckboxClick(e, realIndex, cardEl) {
@@ -2710,6 +2930,28 @@
                 return;
             }
 
+            // Ctrl/Cmd + Z：Undo
+            if (modKey && e.key === 'z' && !e.shiftKey && !isTyping()) {
+                e.preventDefault();
+                if (AppState.undo()) {
+                    renderAll();
+                    Selection.toast('↩️ 已撤销');
+                }
+                return;
+            }
+
+            // Ctrl/Cmd + Shift + Z 或 Ctrl + Y：Redo
+            if ((modKey && e.shiftKey && e.key === 'z') || (modKey && e.key === 'y')) {
+                if (!isTyping()) {
+                    e.preventDefault();
+                    if (AppState.redo()) {
+                        renderAll();
+                        Selection.toast('↪️ 已重做');
+                    }
+                    return;
+                }
+            }
+
             // / 键：聚焦搜索框（非输入状态下）
             if (e.key === '/' && !isTyping()) {
                 e.preventDefault();
@@ -2717,6 +2959,72 @@
                 return;
             }
         });
+
+        // ==========================================
+        // AppState 调试面板（Ctrl+Shift+S）
+        // ==========================================
+        (function() {
+            const panel = document.createElement('div');
+            panel.id = 'appStateDebug';
+            panel.style.cssText = `
+                position: fixed; top: 80px; right: 16px; z-index: 9998;
+                background: rgba(0,0,0,0.90); color: #0f0; font-family: monospace;
+                font-size: 12px; padding: 14px 16px; border-radius: 12px;
+                min-width: 280px; max-width: 340px; display: none; line-height: 1.8;
+                border: 1px solid rgba(0,255,0,0.2); backdrop-filter: blur(8px);
+                max-height: 70vh; overflow-y: auto;
+            `;
+            document.body.appendChild(panel);
+
+            let visible = false;
+            let timer = null;
+
+            function update() {
+                if (!visible) return;
+                const links   = AppState.get('data.links');
+                const filters = AppState.get('filters');
+                const ui      = AppState.get('ui');
+                const hist    = AppState.getHistory();
+                const curHist = hist.find(h => h.current);
+
+                panel.innerHTML = `
+                    <div style="color:#fff;font-weight:bold;margin-bottom:8px;font-size:13px">
+                        🧠 AppState 调试面板
+                        <span style="color:#666;font-size:11px;float:right">Ctrl+Shift+S 关闭</span>
+                    </div>
+                    <div style="color:#aaa;margin-bottom:6px;font-size:11px">── 数据 ──</div>
+                    <div>链接总数：<span style="color:#0ff">${links.length}</span></div>
+                    <div style="color:#aaa;margin:6px 0 4px;font-size:11px">── 筛选器 ──</div>
+                    <div>标签筛选：<span style="color:#0ff">${filters.tag}</span></div>
+                    <div>搜索词：<span style="color:#0ff">"${filters.searchKeyword || ''}"</span></div>
+                    <div style="color:#aaa;margin:6px 0 4px;font-size:11px">── UI 状态 ──</div>
+                    <div>主题：<span style="color:#0ff">${ui.theme}</span></div>
+                    <div>统计面板：<span style="color:${ui.statsCollapsed ? '#f80' : '#0f0'}">${ui.statsCollapsed ? '已折叠' : '已展开'}</span></div>
+                    <div>选择模式：<span style="color:${ui.selectionMode ? '#0f0' : '#666'}">${ui.selectionMode ? '开启' : '关闭'}</span></div>
+                    <div>已选链接：<span style="color:#0ff">${Selection.selected.size} 个</span></div>
+                    <div style="color:#aaa;margin:6px 0 4px;font-size:11px">── 历史记录（${hist.length}/${10}）──</div>
+                    ${hist.slice(-5).reverse().map((h, i) => `
+                        <div style="color:${h.current ? '#0f0' : '#666'};font-size:11px">
+                            ${h.current ? '▶ ' : '  '}${h.action}
+                            <span style="color:#444">${new Date(h.ts).toLocaleTimeString()}</span>
+                        </div>`).join('')}
+                    <div style="color:#aaa;margin:8px 0 4px;font-size:11px">── 快捷操作 ──</div>
+                    <div style="color:#ff0;font-size:11px">Ctrl+Z 撤销 | Ctrl+Shift+Z 重做</div>
+                    <div style="color:#ff0;font-size:11px">AppState.debug() 打印完整状态</div>
+                `;
+                timer = setTimeout(update, 800);
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+                    e.preventDefault();
+                    visible = !visible;
+                    panel.style.display = visible ? 'block' : 'none';
+                    if (visible) update();
+                    else clearTimeout(timer);
+                }
+            });
+        })();
     </script>
 </body>
 </html>

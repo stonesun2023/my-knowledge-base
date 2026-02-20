@@ -1,0 +1,23 @@
+﻿# 依赖
+node_modules/
+package-lock.json
+
+# 构建产物
+dist/
+build/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 本地环境
+.env
+.env.local
+
+# 日志
+*.log
+
+# 测试文件
+test-*.html
+create-icon.js
+main.js

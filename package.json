@@ -1,11 +1,63 @@
 {
   "name": "my-knowledge-base",
   "version": "1.0.0",
-  "description": "",
+  "description": "超级大脑 - 链接知识库管理工具",
+  "main": "main.js",
   "scripts": {
     "start": "http-server -p 8080 -o",
     "dev": "http-server -p 3000 -o",
+    "electron": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:dir": "electron-builder --win --x64 --dir",
     "deploy": "git add . && git commit -m '更新' && git push"
+  },
+  "build": {
+    "appId": "com.superbrain.app",
+    "productName": "超级大脑",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "link-preview.js",
+      "assets/**/*",
+      "!node_modules/**/*",
+      "!dist/**/*",
+      "!test-*",
+      "!*.md",
+      "!output.txt",
+      "!hello.js",
+      "!file-demo.js"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "超级大脑",
+      "language": "2052"
+    },
+    "portable": {
+      "artifactName": "超级大脑_便携版_${version}.exe"
+    }
   },
   "repository": {
     "type": "git",
@@ -18,5 +70,9 @@
   "bugs": {
     "url": "https://github.com/stonesun2023/my-knowledge-base/issues"
   },
-  "homepage": "https://github.com/stonesun2023/my-knowledge-base#readme"
+  "homepage": "https://github.com/stonesun2023/my-knowledge-base#readme",
+  "devDependencies": {
+    "electron": "^34.3.0",
+    "electron-builder": "^25.1.8"
+  }
 }

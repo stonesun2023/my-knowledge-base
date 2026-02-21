@@ -657,5 +657,7 @@ export {
     bindAISummaryButtons,
     renderBatchSummaryButton,
     renderRecommendButton,
-    renderAIRecommendButton
+    renderAIRecommendButton,
+    tagSuggesterUI,
+    summarizerUI
 };

@@ -275,62 +275,66 @@ class TagSuggesterUI {
             /* AI 功能按钮行 - 需要相对定位让推荐标签向上弹出 */
             .ai-actions-row {
                 position: relative;
+                overflow: visible;
+                display: flex;
+                gap: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid var(--border-color);
+                flex-wrap: wrap;
             }
 
-            /* 智能推荐按钮 */
+            /* 智能推荐按钮 - 轻量风格，与编辑/删除按钮一致 */
             .ai-tag-suggest-btn {
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
-                padding: 6px 12px;
-                margin-top: 8px;
-                background: linear-gradient(135deg, var(--accent-color), #5856d6);
-                color: white;
-                border: none;
-                border-radius: 16px;
-                font-size: 12px;
-                font-weight: 500;
+                padding: 6px 14px;
+                border-radius: 4px;
+                font-size: 13px;
                 cursor: pointer;
-                transition: all 0.2s ease;
+                border: 1px solid var(--border-color);
+                background: transparent;
+                color: var(--text-secondary);
                 font-family: inherit;
+                transition: all 0.15s ease;
             }
 
             .ai-tag-suggest-btn:hover:not(:disabled) {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+                background: var(--tag-bg);
+                color: var(--text-primary);
+                border-color: #d0d0ce;
             }
 
             .ai-tag-suggest-btn:disabled {
-                opacity: 0.7;
+                opacity: 0.6;
                 cursor: not-allowed;
             }
 
             .ai-tag-suggest-btn.loading {
-                background: var(--bg-card);
-                color: var(--text-secondary);
+                color: var(--text-tertiary);
             }
 
-            /* 推荐容器 - 向右弹出 */
+            /* 推荐容器 - 向上弹出 */
             .ai-tag-suggestions {
                 position: absolute;
-                left: 100%;
-                top: 0;
-                bottom: auto;
-                margin-left: 8px;
+                bottom: calc(100% + 8px);
+                left: 0;
+                top: auto;
                 min-width: 180px;
-                max-width: 280px;
+                max-width: 300px;
                 padding: 10px 12px;
-                background: var(--bg-card);
+                background: var(--bg-secondary);
                 border-radius: 10px;
                 border: 1px solid var(--border-color);
-                box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
-                animation: slideRight 0.2s ease;
-                z-index: 100;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.12);
+                animation: slideUp 0.2s ease;
+                z-index: 200;
             }
 
-            @keyframes slideRight {
-                from { opacity: 0; transform: translateX(-4px); }
-                to { opacity: 1; transform: translateX(0); }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(4px); }
+                to   { opacity: 1; transform: translateY(0); }
             }
 
             .ai-tag-label {
@@ -412,7 +416,7 @@ class TagSuggesterUI {
             }
 
             body.dark-mode .ai-tag-suggestions {
-                background: rgba(0, 0, 0, 0.2);
+                background: var(--bg-secondary);
             }
         `;
     }

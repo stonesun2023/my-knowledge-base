@@ -19,34 +19,48 @@
            CSS 变量定义（浅色模式）
         ========================================== */
         :root {
-            --bg-primary: #f9f6f1;
+            --bg-primary: #f7f6f3;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --bg-card-hover: #f0f8fc;
+            --bg-card-hover: #f7f6f3;
 
-            --text-primary: #2e3038;
-            --text-secondary: #6b7280;
-            --text-tertiary: #a8b2bc;
-
-            --border-color: rgba(60,70,90,0.10);
-            --accent-color: #7ab5d4;
-            --accent-hover: #a8d0e6;
-
-            --tag-bg: #daeef7;
-            --tag-color: #7ab5d4;
-
-            --shadow-light: rgba(60,70,90,0.07);
-            --shadow-medium: rgba(60,70,90,0.11);
-            --shadow-heavy: rgba(122,181,212,0.35);
-
-            --highlight-bg: #daeef7;
-
-            --sage: #89b09a;
-            --sage-pale: #ddf0e6;
-            --blush: #e8a598;
-            --blush-pale: #fce8e4;
-            --honey: #c9a96e;
-            --honey-pale: #f5e9d0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #787774;
+            --text-tertiary: #9b9a97;
+            
+            --border-color: #e9e9e7;
+            --accent-color: #1a1a1a;
+            --accent-hover: #333333;
+            
+            --tag-bg: #f1f0ef;
+            --tag-color: #787774;
+            
+            --shadow-light: rgba(0,0,0,0.04);
+            --shadow-medium: rgba(0,0,0,0.08);
+            --shadow-heavy: rgba(0,0,0,0.12);
+            
+            --highlight-bg: #fdecc8;
+            
+            --sage: #d3e5ef;
+            --sage-pale: #e8f5e9;
+            --blush: #fadec9;
+            --blush-pale: #fce4ec;
+            --honey: #fdecc8;
+            --honey-pale: #fff8e7;
+            
+            /* Notion 彩色标签 */
+            --tag-ai-bg: #fdecc8;       --tag-ai-color: #c97c24;
+            --tag-code-bg: #d3e5ef;     --tag-code-color: #2f7da0;
+            --tag-design-bg: #fadec9;   --tag-design-color: #c94f28;
+            --tag-learn-bg: #dbeddb;    --tag-learn-color: #2d6a2d;
+            --tag-work-bg: #e8def8;     --tag-work-color: #6940a5;
+            --tag-tool-bg: #d3e5ef;     --tag-tool-color: #2f7da0;
+            --tag-other-bg: #f1f0ef;    --tag-other-color: #787774;
+            
+            --radius-card: 6px;
+            --radius-btn: 6px;
+            --radius-input: 6px;
+            --radius-tag: 4px;
         }
 
         /* ==========================================
@@ -240,7 +254,7 @@
             padding: 16px;
             margin: 10px 0;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--radius-input);
             font-size: 17px;
             background-color: var(--bg-secondary);
             color: var(--text-primary);
@@ -264,10 +278,10 @@
             width: 100%;
             padding: 16px;
             margin: 16px 0;
-            background-color: var(--accent-color);
+            background-color: #1a1a1a;
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: var(--radius-btn);
             font-size: 17px;
             cursor: pointer;
             font-weight: 500;
@@ -342,7 +356,7 @@
         #collections {
             background-color: var(--bg-secondary);
             padding: 32px;
-            border-radius: 18px;
+            border-radius: var(--radius-card);
             margin-top: 20px;
             box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
             transition: all 0.3s ease;
@@ -433,7 +447,7 @@
         .link-card {
             background-color: var(--bg-card);
             border: none;
-            border-radius: 16px;
+            border-radius: var(--radius-card);
             padding: 20px;
             margin-bottom: 12px;
             box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
@@ -590,7 +604,7 @@
         ========================================== */
         #statsPanel {
             background-color: var(--bg-secondary);
-            border-radius: 18px;
+            border-radius: var(--radius-card);
             margin-top: 20px;
             box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
             overflow: hidden;
@@ -831,7 +845,7 @@
         ========================================== */
         #insightsPanel {
             background-color: var(--bg-secondary);
-            border-radius: 18px;
+            border-radius: var(--radius-card);
             margin-top: 16px;
             box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
             overflow: hidden;

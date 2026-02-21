@@ -310,25 +310,27 @@ class TagSuggesterUI {
                 color: var(--text-secondary);
             }
 
-            /* 推荐容器 - 向上弹出 */
+            /* 推荐容器 - 向右弹出 */
             .ai-tag-suggestions {
                 position: absolute;
-                bottom: 100%;
-                left: 0;
-                right: 0;
-                margin-bottom: 8px;
+                left: 100%;
+                top: 0;
+                bottom: auto;
+                margin-left: 8px;
+                min-width: 180px;
+                max-width: 280px;
                 padding: 10px 12px;
                 background: var(--bg-card);
                 border-radius: 10px;
                 border: 1px solid var(--border-color);
-                box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
-                animation: slideUp 0.2s ease;
+                box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+                animation: slideRight 0.2s ease;
                 z-index: 100;
             }
 
-            @keyframes slideUp {
-                from { opacity: 0; transform: translateY(4px); }
-                to { opacity: 1; transform: translateY(0); }
+            @keyframes slideRight {
+                from { opacity: 0; transform: translateX(-4px); }
+                to { opacity: 1; transform: translateX(0); }
             }
 
             .ai-tag-label {

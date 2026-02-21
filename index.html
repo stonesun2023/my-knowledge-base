@@ -1911,8 +1911,6 @@
             <div id="view-tabs" style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg-secondary,#1e293b);padding:4px;border-radius:10px;width:fit-content;">
                 <button id="tab-list" onclick="switchView('list')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--accent-color,#1a1a1a);color:#fff;transition:all 0.2s;">🔗 列表</button>
                 <button id="tab-graph" onclick="switchView('graph')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🗺️ 图谱</button>
-                <button id="tab-summary" onclick="alert('敬请期待')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">💡 摘要</button>
-                <button id="tab-recommend" onclick="alert('敬请期待')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🔗 相关推荐</button>
             </div>
 
             <div id="linkList"></div>
@@ -2440,9 +2438,15 @@
                 const url   = searchKeyword ? highlight(link.url,   searchKeyword) : escapeHTML(link.url);
                 const note  = searchKeyword ? highlight(link.note,  searchKeyword) : escapeHTML(link.note);
 
-                // AI 智能推荐按钮（通过 appModule 渲染）
+                // AI 功能按钮（通过 appModule 渲染）
                 const aiTagBtn = (window.appModule && window.appModule.renderAITagButton) 
                     ? window.appModule.renderAITagButton(link, realIndex) 
+                    : '';
+                const aiSummaryBtn = (window.appModule && window.appModule.renderAISummaryButton) 
+                    ? window.appModule.renderAISummaryButton(link, realIndex) 
+                    : '';
+                const aiRecommendBtn = (window.appModule && window.appModule.renderAIRecommendButton) 
+                    ? window.appModule.renderAIRecommendButton(link, realIndex) 
                     : '';
 
                 html += `
@@ -2462,6 +2466,8 @@
                                 <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
                             </div>
                             <div class="ai-actions-row">
+                                ${aiSummaryBtn}
+                                ${aiRecommendBtn}
                                 ${aiTagBtn}
                             </div>
                         </div>

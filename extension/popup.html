@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background: #f9f6f1;
+      color: #2e3038;
+    }
+    .header {
+      background: #7ab5d4;
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .body { padding: 16px; }
+    .field { margin-bottom: 12px; }
+    .field label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid rgba(60,70,90,0.15);
+      border-radius: 8px;
+      font-size: 13px;
+      background: white;
+      color: #2e3038;
+      outline: none;
+    }
+    .field input:focus {
+      border-color: #7ab5d4;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid rgba(60,70,90,0.15);
+      background: white;
+      transition: all 0.2s;
+    }
+    .tag.selected {
+      background: #daeef7;
+      border-color: #7ab5d4;
+      color: #7ab5d4;
+      font-weight: 500;
+    }
+    .ai-tag {
+      background: #f0e6ff;
+      border-color: #b088e8;
+      color: #7c3aed;
+    }
+    .ai-tag.selected {
+      background: #e0d0ff;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 10px;
+      background: #7ab5d4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .btn-save:hover { background: #5a9fc0; }
+    .btn-save:disabled { background: #b0c8d4; cursor: not-allowed; }
+    .status {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 10px;
+      min-height: 20px;
+      color: #6b7280;
+    }
+    .status.success { color: #34c759; }
+    .status.error { color: #ff3b30; }
+    .ai-hint {
+      font-size: 11px;
+      color: #b088e8;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">🧠 超级大脑 · 一键收藏</div>
+  <div class="body">
+    <div class="field">
+      <label>标题</label>
+      <input type="text" id="titleInput" placeholder="网页标题">
+    </div>
+    <div class="field">
+      <label>网址</label>
+      <input type="text" id="urlInput" placeholder="URL" readonly>
+    </div>
+    <div class="field">
+      <label>标签</label>
+      <div class="tags" id="tagList">
+        <span class="tag" data-tag="编程">💻 编程</span>
+        <span class="tag" data-tag="设计">🎨 设计</span>
+        <span class="tag" data-tag="AI">🤖 AI</span>
+        <span class="tag" data-tag="学习">📖 学习</span>
+        <span class="tag" data-tag="工作">💼 工作</span>
+        <span class="tag" data-tag="工具">🔧 工具</span>
+        <span class="tag" data-tag="其他">📌 其他</span>
+      </div>
+      <div class="ai-hint" id="aiHint"></div>
+    </div>
+    <button class="btn-save" id="btnSave">✨ 保存到知识库</button>
+    <div class="status" id="status"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

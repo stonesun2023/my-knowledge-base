@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "超级大脑 - 一键收藏",
+  "version": "1.0.0",
+  "description": "一键保存当前网页到超级大脑知识库",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "https://stonesun2023.github.io/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "assets/icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://stonesun2023.github.io/my-knowledge-base/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "128": "assets/icon.png"
+  }
+}

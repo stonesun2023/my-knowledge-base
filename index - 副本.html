@@ -276,27 +276,26 @@
         ========================================== */
         .save-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             margin: 16px 0;
             background-color: #1a1a1a;
             color: white;
             border: none;
             border-radius: var(--radius-btn);
-            font-size: 15px;
+            font-size: 17px;
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .save-btn:hover {
-            background-color: #2f2f2f;
-            transform: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-heavy);
         }
 
         .save-btn:active {
-            transform: none;
-            background-color: #111;
+            transform: translateY(0);
         }
 
         /* ==========================================
@@ -321,35 +320,34 @@
         }
 
         .tag-btn {
-            padding: 5px 12px;
-            background-color: transparent;
-            color: var(--text-secondary);
+            padding: 8px 16px;
+            background-color: var(--tag-bg);
+            color: var(--tag-color);
             border: none;
-            border-radius: 4px;
-            font-size: 13px;
+            border-radius: 20px;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.15s ease;
-            font-weight: 400;
+            transition: all 0.2s ease;
+            font-weight: 500;
             width: auto;
             margin: 0;
         }
 
         .tag-btn:hover {
-            background-color: var(--tag-bg);
-            color: var(--text-primary);
-            transform: none;
-            box-shadow: none;
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-heavy);
         }
 
         .tag-btn.selected {
-            background-color: #f1f0ef;
-            color: var(--text-primary);
-            font-weight: 500;
-            border-color: transparent;
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
         }
 
         .tag-btn.selected:hover {
-            background-color: #e9e9e7;
+            background-color: var(--accent-hover);
         }
 
         /* ==========================================
@@ -517,14 +515,13 @@
 
         .link-card .card-tag {
             display: inline-block;
-            padding: 3px 8px;
+            padding: 4px 12px;
             background-color: var(--tag-bg);
             color: var(--tag-color);
-            border-radius: 4px;
-            font-size: 12px;
+            border-radius: 12px;
+            font-size: 13px;
             margin-top: 8px;
-            transition: opacity 0.15s ease;
-            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .card-actions {
@@ -534,38 +531,35 @@
         }
 
         .edit-btn, .delete-btn {
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 13px;
+            padding: 8px 16px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
             cursor: pointer;
             width: auto;
             margin: 0;
-            transition: all 0.15s ease;
-            font-family: inherit;
+            transition: all 0.2s ease;
         }
 
         .edit-btn {
-            background-color: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
+            background-color: var(--accent-color);
         }
 
         .edit-btn:hover {
-            background-color: var(--tag-bg);
-            color: var(--text-primary);
-            border-color: #d0d0ce;
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-heavy);
         }
 
         .delete-btn {
-            background-color: transparent;
-            color: #787774;
-            border: 1px solid var(--border-color);
+            background-color: #ff3b30;
         }
 
         .delete-btn:hover {
-            background-color: #fff0f0;
-            color: #c94f28;
-            border-color: #f5c5b8;
+            background-color: #ff2d20;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
         }
 
         /* ==========================================
@@ -1543,19 +1537,20 @@
 
         /* 标签按钮选中动画 */
         .tag-btn.selected {
-            animation: none;
+            animation: tagPulse 0.3s ease;
         }
 
         @keyframes tagPulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
 
         /* 卡片标签 hover */
         .link-card .card-tag:hover {
-            opacity: 0.8;
-            transform: none;
+            background-color: var(--accent-color);
+            color: white;
+            transform: scale(1.02);
         }
 
         /* 图表容器 hover */
@@ -2412,17 +2407,7 @@
             result.forEach(function(link) {
                 const realIndex = links.indexOf(link);
                 const isSelected = Selection.selected.has(realIndex);
-                const tagColorMap = {
-                    'AI':   'background:#fdecc8;color:#c97c24',
-                    '编程': 'background:#d3e5ef;color:#2f7da0',
-                    '设计': 'background:#fadec9;color:#c94f28',
-                    '学习': 'background:#dbeddb;color:#2d6a2d',
-                    '工作': 'background:#e8def8;color:#6940a5',
-                    '工具': 'background:#d3e5ef;color:#2f7da0',
-                    '其他': 'background:#f1f0ef;color:#787774',
-                };
-                const tagStyle = link.tag ? (tagColorMap[link.tag] || 'background:#f1f0ef;color:#787774') : '';
-                const tagHTML = link.tag ? `<span class="card-tag" style="${tagStyle}">${link.tag}</span>` : '';
+                const tagHTML = link.tag ? `<span class="card-tag">🏷️ ${link.tag}</span>` : '';
                 const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
                 const url   = searchKeyword ? highlight(link.url,   searchKeyword) : escapeHTML(link.url);
                 const note  = searchKeyword ? highlight(link.note,  searchKeyword) : escapeHTML(link.note);

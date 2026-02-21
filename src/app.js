@@ -240,12 +240,21 @@ class AdvancedSearchManager {
                         <div class="card-actions">
                             <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
                             <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                            ${window.appModule ? window.appModule.renderAISummaryButton(link, realIndex) : ''}
+                            ${window.appModule ? window.appModule.renderRecommendButton(link, realIndex) : ''}
+                            ${window.appModule ? window.appModule.renderAITagButton(link, realIndex) : ''}
                         </div>
                     </div>
                 </div>`;
         });
         
         linkList.innerHTML = html;
+
+        // 绑定 AI 功能按钮事件
+        if (window.appModule) {
+            window.appModule.bindAISummaryButtons(linkList);
+            window.appModule.bindAITagButtons(linkList);
+        }
 
         // 重新绑定链接预览
         if (window.LinkPreview) {

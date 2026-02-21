@@ -822,6 +822,44 @@
         }
 
         /* ==========================================
+           AI 知识洞察面板
+        ========================================== */
+        #insightsPanel {
+            background-color: var(--bg-secondary);
+            border-radius: 18px;
+            margin-top: 16px;
+            box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .insights-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: insights-spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes insights-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        /* ==========================================
            链接预览浮层
         ========================================== */
         #linkPreview {
@@ -1710,6 +1748,54 @@
                 <div class="stats-top-tags">
                     <div class="top-tags-title">🏆 标签排行榜</div>
                     <div class="top-tags-list" id="topTagsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 知识洞察面板 -->
+        <div id="insightsPanel">
+            <div class="stats-header" id="insightsHeader">
+                <div class="stats-header-left">
+                    <span style="font-size:22px;">🤖</span>
+                    <div>
+                        <div class="stats-header-title">AI 知识洞察</div>
+                        <div class="stats-header-subtitle" id="insightsSubtitle">让 AI 分析你的知识结构</div>
+                    </div>
+                </div>
+                <span class="stats-toggle-icon" id="insightsToggleIcon">▼</span>
+            </div>
+            <div class="stats-body" id="insightsBody" style="display:none;">
+                <div id="insightsContent">
+                    <div id="insightsIdle" style="text-align:center; padding: 24px 16px;">
+                        <div style="font-size:48px; margin-bottom:12px;">🧠</div>
+                        <div style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">
+                            AI 将分析你的收藏内容，生成个性化的知识洞察报告
+                        </div>
+                        <button id="btnGenerateInsights" class="btn-primary" style="padding:10px 28px; font-size:15px; border-radius:20px;">
+                            ✨ 生成洞察报告
+                        </button>
+                        <div id="insightsError" style="display:none; color:#ff3b30; font-size:13px; margin-top:12px;"></div>
+                    </div>
+                    <div id="insightsLoading" style="display:none; text-align:center; padding:32px;">
+                        <div class="insights-spinner"></div>
+                        <div style="color:var(--text-secondary); font-size:14px; margin-top:12px;">AI 分析中，请稍候...</div>
+                    </div>
+                    <div id="insightsResult" style="display:none;">
+                        <div id="insightsText" style="
+                            font-size:14px; line-height:1.8;
+                            color:var(--text-primary);
+                            padding: 4px 8px;
+                            white-space: pre-wrap;
+                        "></div>
+                        <div style="text-align:right; margin-top:16px;">
+                            <button id="btnReInsights" style="
+                                background:none; border:1px solid var(--border-color);
+                                border-radius:14px; padding:6px 16px;
+                                font-size:13px; color:var(--text-secondary);
+                                cursor:pointer;
+                            ">🔄 重新分析</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3210,10 +3296,72 @@
                         console.error('❌ 相关推荐功能初始化失败:', e);
                     }
                     
+                    // 初始化 AI 知识洞察模块
+                    initKnowledgeInsights();
+                    
                     console.log('✅ 所有模块加载完成');
                 })
                 .catch(function(err) {
                     console.error('⚠️ 模块加载失败:', err);
+                });
+        }
+
+        // ==========================================
+        // AI 知识洞察模块
+        // ==========================================
+        function initKnowledgeInsights() {
+            import('./src/ai/KnowledgeInsights.js')
+                .then(function(module) {
+                    const knowledgeInsights = module.knowledgeInsights;
+                    
+                    // 折叠/展开
+                    document.getElementById('insightsHeader').addEventListener('click', function() {
+                        const body = document.getElementById('insightsBody');
+                        const icon = document.getElementById('insightsToggleIcon');
+                        const isOpen = body.style.display !== 'none';
+                        body.style.display = isOpen ? 'none' : 'block';
+                        icon.textContent = isOpen ? '▼' : '▲';
+                    });
+
+                    // 生成报告
+                    async function generateInsights() {
+                        const idle = document.getElementById('insightsIdle');
+                        const loading = document.getElementById('insightsLoading');
+                        const result = document.getElementById('insightsResult');
+                        const errorEl = document.getElementById('insightsError');
+                        const subtitle = document.getElementById('insightsSubtitle');
+
+                        idle.style.display = 'none';
+                        loading.style.display = 'block';
+                        result.style.display = 'none';
+                        errorEl.style.display = 'none';
+                        
+                        try {
+                            const links = AppState.get('data.links') || [];
+                            const report = await knowledgeInsights.analyze(links);
+                        
+                            document.getElementById('insightsText').textContent = report;
+                            loading.style.display = 'none';
+                            result.style.display = 'block';
+                            subtitle.textContent = '上次分析：' + new Date().toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+                        } catch (err) {
+                            loading.style.display = 'none';
+                            idle.style.display = 'block';
+                            errorEl.style.display = 'block';
+                            errorEl.textContent = '⚠️ ' + err.message;
+                        }
+                    }
+
+                    document.getElementById('btnGenerateInsights').addEventListener('click', generateInsights);
+                    document.getElementById('btnReInsights').addEventListener('click', function() {
+                        document.getElementById('insightsResult').style.display = 'none';
+                        document.getElementById('insightsIdle').style.display = 'block';
+                    });
+                    
+                    console.log('✅ AI 知识洞察模块已初始化');
+                })
+                .catch(function(err) {
+                    console.error('❌ AI 知识洞察模块初始化失败:', err);
                 });
         }
 

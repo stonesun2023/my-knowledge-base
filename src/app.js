@@ -240,8 +240,12 @@ class AdvancedSearchManager {
                         <div class="card-actions">
                             <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
                             <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                        </div>
+                        <div class="ai-actions-row">
                             ${window.appModule ? window.appModule.renderAISummaryButton(link, realIndex) : ''}
+                            <span class="ai-action-divider">·</span>
                             ${window.appModule ? window.appModule.renderRecommendButton(link, realIndex) : ''}
+                            <span class="ai-action-divider">·</span>
                             ${window.appModule ? window.appModule.renderAITagButton(link, realIndex) : ''}
                         </div>
                     </div>
@@ -484,6 +488,16 @@ function initSummarizer() {
     const styleEl = document.createElement('style');
     styleEl.textContent = SummarizerUI.getStyles();
     document.head.appendChild(styleEl);
+
+    // 挂载 openSummaryModal 到 window，供 onclick 调用
+    window.openSummaryModal = (linkId, linkData) => {
+        summarizerUI.openSummaryModal(linkId, linkData);
+    };
+
+    // 挂载 closeSummaryModal 到 window
+    window.closeSummaryModal = () => {
+        summarizerUI._closeModal();
+    };
 
     // 绑定批量生成按钮事件
     document.addEventListener('click', (e) => {

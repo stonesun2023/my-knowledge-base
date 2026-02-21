@@ -2466,10 +2466,14 @@
                             ${tagHTML}
                             <p class="link-time">🕒 ${link.time}</p>
                             <div class="card-actions">
-                                <button class="edit-btn"   onclick="editLink(${realIndex})">✏️ 编辑</button>
+                                <button class="edit-btn" onclick="editLink(${realIndex})">✏️ 编辑</button>
                                 <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
+                            </div>
+                            <div class="ai-actions-row">
                                 ${aiSummaryBtn}
+                                <span class="ai-action-divider">·</span>
                                 ${recommendBtn}
+                                <span class="ai-action-divider">·</span>
                                 ${aiTagBtn}
                             </div>
                         </div>

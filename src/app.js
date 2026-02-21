@@ -640,6 +640,9 @@ async function handleBatchSummary() {
     }
 }
 
+// 别名：供 index.html 调用
+const renderAIRecommendButton = renderRecommendButton;
+
 // 导出
 export { 
     AdvancedSearchManager, 
@@ -653,5 +656,6 @@ export {
     renderAISummaryButton,
     bindAISummaryButtons,
     renderBatchSummaryButton,
-    renderRecommendButton
+    renderRecommendButton,
+    renderAIRecommendButton
 };

@@ -105,14 +105,32 @@ class SummarizerUI {
             
             const timeAgo = this._formatTimeAgo(result.updatedAt || Date.now());
             
+            // 将 Markdown 转换为 HTML
+            const formattedSummary = result.summary
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^#{1,3}\s(.+)$/gm, '<strong>$1</strong>')
+                .replace(/^•\s(.+)$/gm, '<li>$1</li>')
+                .replace(/^-\s(.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            // 内容类型标签
+            const typeLabels = {
+                tech: '🔧 技术文档', video: '🎬 视频',
+                podcast: '🎙️ 播客', paper: '📄 论文', article: '📝 文章'
+            };
+            const typeLabel = typeLabels[result.contentType] || '📝 文章';
+
             container.innerHTML = `
                 <div class="ai-summary-detail">
                     <div class="ai-summary-header">
                         <span class="ai-summary-icon">💡</span>
                         <span class="ai-summary-label">AI 摘要</span>
+                        <span class="ai-summary-type-tag">${typeLabel}</span>
                         <span class="ai-summary-time">${result.cached ? '缓存' : '生成'}于 ${timeAgo}</span>
                     </div>
-                    <div class="ai-summary-content">${result.summary}</div>
+                    <div class="ai-summary-content"><p>${formattedSummary}</p></div>
                     <div class="ai-summary-actions">
                         <button class="ai-summary-refresh" data-link-id="${linkId}">
                             🔄 重新生成
@@ -343,6 +361,39 @@ class SummarizerUI {
                 font-size: 12px;
                 color: var(--text-tertiary);
                 margin-left: auto;
+            }
+
+            .ai-summary-type-tag {
+                font-size: 11px;
+                padding: 2px 8px;
+                background: rgba(88, 86, 214, 0.1);
+                color: #5856d6;
+                border-radius: 999px;
+                font-weight: 500;
+            }
+
+            body.dark-mode .ai-summary-type-tag {
+                background: rgba(88, 86, 214, 0.2);
+                color: #af52de;
+            }
+
+            .ai-summary-content p {
+                margin: 0 0 10px 0;
+            }
+
+            .ai-summary-content ul {
+                margin: 4px 0 10px 0;
+                padding-left: 18px;
+            }
+
+            .ai-summary-content li {
+                margin-bottom: 4px;
+                line-height: 1.6;
+            }
+
+            .ai-summary-content strong {
+                color: var(--text-primary);
+                font-weight: 600;
             }
 
             .ai-summary-content {

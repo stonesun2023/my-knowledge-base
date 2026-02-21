@@ -134,7 +134,6 @@ class TagSuggesterUI {
         }).join('');
 
         container.innerHTML = `
-            <div class="ai-tag-label">AI 推荐：</div>
             <div class="ai-tag-list">${tagsHTML}</div>
         `;
 
@@ -273,6 +272,11 @@ class TagSuggesterUI {
      */
     static getStyles() {
         return `
+            /* AI 功能按钮行 - 需要相对定位让推荐标签向上弹出 */
+            .ai-actions-row {
+                position: relative;
+            }
+
             /* 智能推荐按钮 */
             .ai-tag-suggest-btn {
                 display: inline-flex;
@@ -306,18 +310,24 @@ class TagSuggesterUI {
                 color: var(--text-secondary);
             }
 
-            /* 推荐容器 */
+            /* 推荐容器 - 向上弹出 */
             .ai-tag-suggestions {
-                margin-top: 10px;
+                position: absolute;
+                bottom: 100%;
+                left: 0;
+                right: 0;
+                margin-bottom: 8px;
                 padding: 10px 12px;
                 background: var(--bg-card);
                 border-radius: 10px;
                 border: 1px solid var(--border-color);
-                animation: fadeIn 0.2s ease;
+                box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+                animation: slideUp 0.2s ease;
+                z-index: 100;
             }
 
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-4px); }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(4px); }
                 to { opacity: 1; transform: translateY(0); }
             }
 

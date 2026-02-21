@@ -1911,6 +1911,8 @@
             <div id="view-tabs" style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg-secondary,#1e293b);padding:4px;border-radius:10px;width:fit-content;">
                 <button id="tab-list" onclick="switchView('list')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--accent-color,#1a1a1a);color:#fff;transition:all 0.2s;">🔗 列表</button>
                 <button id="tab-graph" onclick="switchView('graph')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🗺️ 图谱</button>
+                <button id="tab-summary" onclick="alert('敬请期待')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">💡 摘要</button>
+                <button id="tab-recommend" onclick="alert('敬请期待')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🔗 相关推荐</button>
             </div>
 
             <div id="linkList"></div>
@@ -2443,16 +2445,6 @@
                     ? window.appModule.renderAITagButton(link, realIndex) 
                     : '';
 
-                // AI 摘要按钮（通过 appModule 渲染）
-                const aiSummaryBtn = (window.appModule && window.appModule.renderAISummaryButton) 
-                    ? window.appModule.renderAISummaryButton(link, realIndex) 
-                    : '';
-
-                // 相关推荐按钮（通过 appModule 渲染）
-                const recommendBtn = (window.appModule && window.appModule.renderRecommendButton) 
-                    ? window.appModule.renderRecommendButton(link, realIndex) 
-                    : '';
-
                 html += `
                     <div class="link-card${isSelected ? ' selected' : ''}" data-real-index="${realIndex}">
                         <div class="card-checkbox${isSelected ? ' checked' : ''}"
@@ -2470,10 +2462,6 @@
                                 <button class="delete-btn" onclick="deleteLink(${realIndex})">🗑️ 删除</button>
                             </div>
                             <div class="ai-actions-row">
-                                ${aiSummaryBtn}
-                                <span class="ai-action-divider">·</span>
-                                ${recommendBtn}
-                                <span class="ai-action-divider">·</span>
                                 ${aiTagBtn}
                             </div>
                         </div>

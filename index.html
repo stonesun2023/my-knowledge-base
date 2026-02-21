@@ -1605,6 +1605,8 @@
             }
         }
     </style>
+    <!-- 知识图谱模块 -->
+    <script src="src/graph.js"></script>
 </head>
 <body>
     <!-- 主题切换按钮 -->
@@ -1905,7 +1907,16 @@
                 <button class="batch-btn cancel" onclick="exitSelectionMode()">✕ 取消选择</button>
             </div>
 
+            <!-- 视图切换 Tab Bar -->
+            <div id="view-tabs" style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg-secondary,#1e293b);padding:4px;border-radius:10px;width:fit-content;">
+                <button id="tab-list" onclick="switchView('list')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--accent-color,#1a1a1a);color:#fff;transition:all 0.2s;">🔗 列表</button>
+                <button id="tab-graph" onclick="switchView('graph')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🗺️ 图谱</button>
+            </div>
+
             <div id="linkList"></div>
+
+            <!-- 知识图谱容器 -->
+            <div id="graph-container" style="display:none;width:100%;height:600px;border-radius:12px;overflow:hidden;border:1px solid #1e293b;"></div>
         </div>
     </div>
 
@@ -3332,6 +3343,16 @@
                     
                     // 初始化 AI 知识洞察模块
                     initKnowledgeInsights();
+
+                    // 初始化 GitHub Gist 云同步模块
+                    try {
+                        import('./src/sync/GistSync.js').then(m => {
+                            m.initGistSync();
+                        });
+                        console.log('✅ 云同步模块已启动');
+                    } catch(e) {
+                        console.error('❌ 云同步模块初始化失败:', e);
+                    }
                     
                     console.log('✅ 所有模块加载完成');
                 })
@@ -3472,6 +3493,65 @@
                 }
             });
         })();
+
+        // ==========================================
+        // 知识图谱 - 视图切换逻辑
+        // ==========================================
+        let currentView = 'list';
+
+        function switchView(view) {
+            currentView = view;
+
+            const listEl  = document.getElementById('linkList');
+            const graphEl = document.getElementById('graph-container');
+            const tabList  = document.getElementById('tab-list');
+            const tabGraph = document.getElementById('tab-graph');
+
+            if (view === 'graph') {
+                if (listEl) listEl.style.display = 'none';
+                if (graphEl) graphEl.style.display = 'block';
+                if (tabList) {
+                    tabList.style.background = 'transparent';
+                    tabList.style.color = 'var(--text-secondary, #787774)';
+                }
+                if (tabGraph) {
+                    tabGraph.style.background = 'var(--accent-color, #1a1a1a)';
+                    tabGraph.style.color = '#fff';
+                }
+                if (window.GraphModule) {
+                    GraphModule.render('graph-container', getLinksForGraph());
+                }
+            } else {
+                if (listEl) listEl.style.display = '';
+                if (graphEl) graphEl.style.display = 'none';
+                if (tabList) {
+                    tabList.style.background = 'var(--accent-color, #1a1a1a)';
+                    tabList.style.color = '#fff';
+                }
+                if (tabGraph) {
+                    tabGraph.style.background = 'transparent';
+                    tabGraph.style.color = 'var(--text-secondary, #787774)';
+                }
+            }
+        }
+
+        function getLinksForGraph() {
+            try {
+                // 使用 AppState 获取链接数据
+                const links = AppState.get('data.links') || [];
+                return links.map(l => ({
+                    id:    l.id    || String(Math.random()),
+                    title: l.title || l.name || l.url,
+                    url:   l.url   || l.link || '',
+                    tag:   l.tag   || l.category || '其他',
+                    note:  l.note  || l.desc || '',
+                    date:  l.date  || l.time || '',
+                }));
+            } catch(e) {
+                console.warn('[Graph] 读取数据失败', e);
+                return [];
+            }
+        }
 
         // ==========================================
         // PWA Service Worker 注册

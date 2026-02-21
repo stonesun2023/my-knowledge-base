@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>超级大脑</title>
     <!-- Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- 链接预览优化模块 -->
     <script src="link-preview.js" defer></script>
@@ -13,27 +14,34 @@
            CSS 变量定义（浅色模式）
         ========================================== */
         :root {
-            --bg-primary: #f5f5f7;
-            --bg-secondary: white;
-            --bg-card: #f9f9f9;
-            --bg-card-hover: white;
-            
-            --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
-            --text-tertiary: #999;
-            
-            --border-color: #d2d2d7;
-            --accent-color: #0071e3;
-            --accent-hover: #0077ed;
-            
-            --tag-bg: #e3f2fd;
-            --tag-color: #0071e3;
-            
-            --shadow-light: rgba(0, 0, 0, 0.08);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
-            --shadow-heavy: rgba(0, 113, 227, 0.3);
-            
-            --highlight-bg: #fff59d;
+            --bg-primary: #f9f6f1;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f0f8fc;
+
+            --text-primary: #2e3038;
+            --text-secondary: #6b7280;
+            --text-tertiary: #a8b2bc;
+
+            --border-color: rgba(60,70,90,0.10);
+            --accent-color: #7ab5d4;
+            --accent-hover: #a8d0e6;
+
+            --tag-bg: #daeef7;
+            --tag-color: #7ab5d4;
+
+            --shadow-light: rgba(60,70,90,0.07);
+            --shadow-medium: rgba(60,70,90,0.11);
+            --shadow-heavy: rgba(122,181,212,0.35);
+
+            --highlight-bg: #daeef7;
+
+            --sage: #89b09a;
+            --sage-pale: #ddf0e6;
+            --blush: #e8a598;
+            --blush-pale: #fce8e4;
+            --honey: #c9a96e;
+            --honey-pale: #f5e9d0;
         }
 
         /* ==========================================
@@ -71,7 +79,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Noto Sans SC', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
             margin: 0;
@@ -294,23 +302,23 @@
 
         .tag-btn {
             padding: 8px 16px;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
+            background-color: var(--tag-bg);
+            color: var(--tag-color);
+            border: none;
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 400;
+            font-weight: 500;
             width: auto;
             margin: 0;
         }
 
         .tag-btn:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-            transform: none;
-            box-shadow: none;
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-heavy);
         }
 
         .tag-btn.selected {
@@ -329,10 +337,11 @@
         #collections {
             background-color: var(--bg-secondary);
             padding: 32px;
-            border-radius: 16px;
+            border-radius: 18px;
             margin-top: 20px;
-            box-shadow: 0 4px 16px var(--shadow-light);
+            box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
             transition: all 0.3s ease;
+            border: none;
         }
 
         #filterBar {
@@ -418,17 +427,35 @@
         ========================================== */
         .link-card {
             background-color: var(--bg-card);
+            border: none;
+            border-radius: 16px;
             padding: 20px;
-            margin: 12px 0;
-            border-radius: 12px;
-            border-left: 4px solid var(--accent-color);
-            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 20px; right: 20px; height: 2px;
+            border-radius: 0 0 2px 2px;
+            background: var(--accent-color);
+            opacity: 0;
+            transition: opacity 0.22s ease;
         }
 
         .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(60,70,90,0.11), 0 2px 8px rgba(60,70,90,0.06);
             background-color: var(--bg-card-hover);
-            box-shadow: 0 4px 12px var(--shadow-medium);
-            transform: translateY(-2px);
+        }
+
+        .link-card:hover::before {
+            opacity: 1;
         }
 
         .link-card h3 {
@@ -558,11 +585,12 @@
         ========================================== */
         #statsPanel {
             background-color: var(--bg-secondary);
-            border-radius: 16px;
+            border-radius: 18px;
             margin-top: 20px;
-            box-shadow: 0 4px 16px var(--shadow-light);
+            box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
             overflow: hidden;
             transition: all 0.3s ease;
+            border: none;
         }
 
         .stats-header {
@@ -630,18 +658,18 @@
 
         .stat-card {
             background: var(--bg-card);
-            border-radius: 14px;
+            border-radius: 12px;
             padding: 18px 16px;
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            box-shadow: 0 2px 12px rgba(60,70,90,0.07), 0 1px 3px rgba(60,70,90,0.04);
         }
 
         .stat-card:hover {
             background: var(--bg-card-hover);
-            border-color: var(--border-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow-medium);
+            box-shadow: 0 8px 24px rgba(60,70,90,0.11);
         }
 
         .stat-card-icon {
@@ -1133,9 +1161,12 @@
 
         /* 选中状态的卡片 */
         .link-card.selected {
-            border-left: 4px solid var(--accent-color);
-            background: rgba(0, 113, 227, 0.05) !important;
-            box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.35), 0 4px 12px var(--shadow-medium);
+            background: rgba(122, 181, 212, 0.07) !important;
+            box-shadow: 0 0 0 2px rgba(122, 181, 212, 0.45), 0 4px 12px var(--shadow-medium);
+        }
+
+        .link-card.selected::before {
+            opacity: 1;
         }
 
         body.dark-mode .link-card.selected {
@@ -1248,14 +1279,14 @@
         }
 
         .batch-btn.export-btn-style {
-            background: #34c759;
+            background: var(--sage);
             color: white;
-            border-color: #34c759;
+            border-color: var(--sage);
         }
 
         .batch-btn.export-btn-style:hover {
-            background: #2db34a;
-            border-color: #2db34a;
+            background: #7aa08a;
+            border-color: #7aa08a;
             color: white;
         }
 
@@ -1401,6 +1432,78 @@
                 font-size: 13px;
                 min-width: 70px;
             }
+        }
+
+        /* ==========================================
+           补充样式 - 日系清新风格
+        ========================================== */
+        
+        /* 标题装饰 */
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 副标题装饰 */
+        .subtitle {
+            position: relative;
+        }
+
+        /* 输入框 focus 优化 */
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(122, 181, 212, 0.15);
+        }
+
+        /* 保存按钮渐变 */
+        .save-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 统计面板标题图标动画 */
+        .stats-header:hover .stats-toggle-icon {
+            color: var(--accent-color);
+        }
+
+        /* 标签按钮选中动画 */
+        .tag-btn.selected {
+            animation: tagPulse 0.3s ease;
+        }
+
+        @keyframes tagPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 卡片标签 hover */
+        .link-card .card-tag:hover {
+            background-color: var(--accent-color);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        /* 图表容器 hover */
+        .chart-container:hover {
+            box-shadow: 0 4px 16px var(--shadow-light);
+        }
+
+        /* 排行榜项目 hover */
+        .top-tag-item:hover .top-tag-name {
+            color: var(--accent-color);
         }
 
         /* ==========================================
@@ -1621,7 +1724,7 @@
             <button class="save-btn" id="exportBtn" style="
                 flex: 1;
                 min-width: 140px;
-                background-color: #34c759;
+                background-color: var(--sage);
                 margin: 0;
                 padding: 12px 20px;
                 font-size: 15px;
@@ -1631,7 +1734,7 @@
             <button class="save-btn" id="importBtn" style="
                 flex: 1;
                 min-width: 140px;
-                background-color: #ff9500;
+                background-color: var(--honey);
                 margin: 0;
                 padding: 12px 20px;
                 font-size: 15px;
@@ -1641,7 +1744,7 @@
             <button class="save-btn" id="clearPreviewCacheBtn" style="
                 flex: 1;
                 min-width: 140px;
-                background-color: #8e8e93;
+                background-color: var(--blush);
                 margin: 0;
                 padding: 12px 20px;
                 font-size: 15px;
@@ -3065,31 +3168,62 @@
         // ==========================================
         // 初始化高级搜索模块 & AI 功能
         // ==========================================
-        import('./src/app.js')
-            .then(function(module) {
-                // 保存模块引用供全局使用
-                window.appModule = module;
-                
-                // 等待 DOM 完全加载后初始化
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
+        function initAppModules() {
+            import('./src/app.js')
+                .then(function(module) {
+                    // 保存模块引用供全局使用
+                    window.appModule = module;
+                    
+                    // 初始化所有模块
+                    try {
                         module.advancedSearchManager.init();
+                        console.log('✅ 高级搜索模块已初始化');
+                    } catch (e) {
+                        console.error('❌ 高级搜索模块初始化失败:', e);
+                    }
+                    
+                    try {
                         module.initAIProviderSwitcher();
+                        console.log('✅ AI 服务商切换器已初始化');
+                    } catch (e) {
+                        console.error('❌ AI 服务商切换器初始化失败:', e);
+                    }
+                    
+                    try {
                         module.initTagSuggester();
+                        console.log('✅ 智能标签推荐已初始化');
+                    } catch (e) {
+                        console.error('❌ 智能标签推荐初始化失败:', e);
+                    }
+                    
+                    try {
                         module.initSummarizer();
+                        console.log('✅ AI 摘要功能已初始化');
+                    } catch (e) {
+                        console.error('❌ AI 摘要功能初始化失败:', e);
+                    }
+                    
+                    try {
                         module.initRecommender();
-                    });
-                } else {
-                    module.advancedSearchManager.init();
-                    module.initAIProviderSwitcher();
-                    module.initTagSuggester();
-                    module.initSummarizer();
-                }
-                console.log('✅ 高级搜索模块 & AI 功能已加载');
-            })
-            .catch(function(err) {
-                console.warn('⚠️ 模块加载失败:', err);
-            });
+                        console.log('✅ 相关推荐功能已初始化');
+                    } catch (e) {
+                        console.error('❌ 相关推荐功能初始化失败:', e);
+                    }
+                    
+                    console.log('✅ 所有模块加载完成');
+                })
+                .catch(function(err) {
+                    console.error('⚠️ 模块加载失败:', err);
+                });
+        }
+
+        // 确保 DOM 完全加载后再初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAppModules);
+        } else {
+            // DOM 已经加载完成，延迟一帧确保所有元素都已渲染
+            requestAnimationFrame(initAppModules);
+        }
 
         // ==========================================
         // AppState 调试面板（Ctrl+Shift+S）

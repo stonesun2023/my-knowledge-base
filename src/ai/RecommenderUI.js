@@ -323,7 +323,7 @@ export class RecommenderUI {
      * 渲染触发按钮
      */
     renderTriggerButton(linkId) {
-        return `<button class="ai-recommend-trigger" data-recommend-link="${linkId}">
+        return `<button class="ai-action-btn ai-recommend-trigger" data-recommend-link="${linkId}">
             🔗 相关推荐
         </button>`;
     }

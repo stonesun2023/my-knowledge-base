@@ -347,22 +347,26 @@ class SummarizerUI {
                 margin: 0 2px;
             }
 
-            /* 轻量化 AI 按钮 */
+            /* 轻量化 AI 按钮 - 统一样式 */
             .ai-action-btn {
-                padding: 4px 10px;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 6px 14px;
                 background: transparent;
                 color: var(--text-secondary);
-                border: none;
+                border: 1px solid var(--border-color);
                 border-radius: 4px;
-                font-size: 12px;
+                font-size: 13px;
                 cursor: pointer;
                 transition: all 0.15s ease;
                 font-family: inherit;
             }
 
             .ai-action-btn:hover {
-                background: var(--bg-card);
-                color: var(--accent-color);
+                background: var(--tag-bg);
+                color: var(--text-primary);
+                border-color: #d0d0ce;
             }
 
             .ai-action-btn:active {

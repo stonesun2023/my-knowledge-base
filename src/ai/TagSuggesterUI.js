@@ -25,12 +25,14 @@ class TagSuggesterUI {
         }
 
         return `
-            <button class="ai-tag-suggest-btn" 
-                    data-link-id="${linkId}" 
-                    data-current-tag="${currentTag || ''}"
-                    title="AI 智能推荐标签">
-                ✨ 智能推荐
-            </button>
+            <span class="ai-tag-btn-wrapper">
+                <button class="ai-tag-suggest-btn" 
+                        data-link-id="${linkId}" 
+                        data-current-tag="${currentTag || ''}"
+                        title="AI 智能推荐标签">
+                    ✨ 智能推荐
+                </button>
+            </span>
         `;
     }
 
@@ -76,7 +78,7 @@ class TagSuggesterUI {
     }
 
     /**
-     * 渲染推荐标签 UI
+     * 渲染推荐标签 UI（多选模式）
      * @param {number|string} linkId 
      * @param {Object} result - { tags, confidence }
      * @param {Object} link 
@@ -90,12 +92,13 @@ class TagSuggesterUI {
         buttonEl.innerHTML = '✨ 智能推荐';
         buttonEl.disabled = false;
 
-        // 查找或创建推荐容器
-        let container = buttonEl.parentElement.querySelector('.ai-tag-suggestions');
+        // 查找或创建推荐容器（append 到 buttonEl.parentElement 即 .ai-tag-btn-wrapper）
+        const wrapper = buttonEl.parentElement;
+        let container = wrapper.querySelector('.ai-tag-suggestions');
         if (!container) {
             container = document.createElement('div');
             container.className = 'ai-tag-suggestions';
-            buttonEl.parentElement.appendChild(container);
+            wrapper.appendChild(container);
         }
 
         if (tags.length === 0) {
@@ -120,13 +123,13 @@ class TagSuggesterUI {
                     </span>
                 `;
             } else {
-                // 新标签：蓝色，可点击
+                // 新标签：可多选
                 return `
                     <span class="ai-tag-chip" 
                           data-link-id="${linkId}" 
                           data-tag="${tag}"
                           data-confidence="${conf}"
-                          title="点击添加此标签">
+                          title="点击选中/取消">
                         ${tag}
                     </span>
                 `;
@@ -135,13 +138,37 @@ class TagSuggesterUI {
 
         container.innerHTML = `
             <div class="ai-tag-list">${tagsHTML}</div>
+            <div class="ai-tag-confirm-row">
+                <button class="ai-tag-confirm-btn" data-link-id="${linkId}">✓ 确认</button>
+                <button class="ai-tag-cancel-btn">取消</button>
+            </div>
         `;
 
-        // 绑定标签点击事件
+        // 绑定标签点击事件：切换选中状态
         container.querySelectorAll('.ai-tag-chip:not(.existing)').forEach(chip => {
             chip.addEventListener('click', () => {
-                this._handleTagClick(chip, linkId);
+                chip.classList.toggle('selected');
             });
+        });
+
+        // 绑定确认按钮：收集所有 selected 的 chip，逐个触发事件
+        container.querySelector('.ai-tag-confirm-btn')?.addEventListener('click', () => {
+            const selectedChips = container.querySelectorAll('.ai-tag-chip.selected');
+            selectedChips.forEach(chip => {
+                const tag = chip.dataset.tag;
+                const event = new CustomEvent('ai-tag-selected', {
+                    detail: { linkId, tag },
+                    bubbles: true
+                });
+                chip.dispatchEvent(event);
+            });
+            // 关闭气泡
+            container.remove();
+        });
+
+        // 绑定取消按钮：直接移除气泡
+        container.querySelector('.ai-tag-cancel-btn')?.addEventListener('click', () => {
+            container.remove();
         });
     }
 
@@ -284,6 +311,12 @@ class TagSuggesterUI {
                 flex-wrap: wrap;
             }
 
+            /* 按钮包装器 - 相对定位，让气泡相对于按钮本身定位 */
+            .ai-tag-btn-wrapper {
+                position: relative;
+                display: inline-flex;
+            }
+
             /* 智能推荐按钮 - 轻量风格，与编辑/删除按钮一致 */
             .ai-tag-suggest-btn {
                 display: inline-flex;
@@ -315,21 +348,20 @@ class TagSuggesterUI {
                 color: var(--text-tertiary);
             }
 
-            /* 推荐容器 - 向上弹出 */
+            /* 气泡改为相对按钮向右上方弹出 */
             .ai-tag-suggestions {
                 position: absolute;
-                bottom: calc(100% + 8px);
+                bottom: calc(100% + 6px);
                 left: 0;
-                top: auto;
-                min-width: 180px;
-                max-width: 300px;
-                padding: 10px 12px;
+                min-width: 200px;
+                max-width: 280px;
+                padding: 12px;
                 background: var(--bg-secondary);
                 border-radius: 10px;
                 border: 1px solid var(--border-color);
-                box-shadow: 0 -4px 16px rgba(0,0,0,0.12);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                 animation: slideUp 0.2s ease;
-                z-index: 200;
+                z-index: 300;
             }
 
             @keyframes slideUp {
@@ -375,6 +407,66 @@ class TagSuggesterUI {
             .ai-tag-chip.added {
                 background: #34c759;
                 cursor: default;
+            }
+
+            /* chip 选中状态 */
+            .ai-tag-chip.selected {
+                background: var(--accent-color);
+                color: white;
+                box-shadow: 0 0 0 2px var(--accent-color);
+            }
+
+            .ai-tag-chip:not(.existing) {
+                background: var(--tag-bg);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+            }
+
+            .ai-tag-chip.selected:not(.existing) {
+                background: var(--accent-color);
+                color: white;
+                border-color: var(--accent-color);
+            }
+
+            /* 确认/取消行 */
+            .ai-tag-confirm-row {
+                display: flex;
+                gap: 6px;
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .ai-tag-confirm-btn {
+                flex: 1;
+                padding: 5px 10px;
+                background: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 12px;
+                cursor: pointer;
+                font-family: inherit;
+            }
+
+            .ai-tag-confirm-btn:hover {
+                opacity: 0.9;
+            }
+
+            .ai-tag-cancel-btn {
+                padding: 5px 10px;
+                background: transparent;
+                color: var(--text-secondary);
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                font-size: 12px;
+                cursor: pointer;
+                font-family: inherit;
+            }
+
+            .ai-tag-cancel-btn:hover {
+                background: var(--bg-card);
+                color: var(--text-primary);
             }
 
             /* 空状态 */

@@ -643,12 +643,12 @@
         init() {
             const listEl = document.getElementById('linkList');
 
-            // mouseenter（捕获阶段）
+    // mouseenter on link URL <a>（捕获阶段）
             listEl.addEventListener('mouseenter', (e) => {
-                const card = e.target.closest('.link-card');
-                if (!card || PreviewUI._isMobile) return;
-                const anchor = card.querySelector('.link-url a');
-                if (!anchor) return;
+                const anchor = e.target.closest('.link-url a');
+                if (!anchor || PreviewUI._isMobile) return;
+                const card = anchor.closest('.link-card');
+                if (!card) return;
 
                 clearTimeout(this._hideTimer);
                 clearTimeout(this._showTimer);
@@ -658,10 +658,10 @@
                 }, CFG.SHOW_DELAY);
             }, true);
 
-            // mouseleave（捕获阶段）
+            // mouseleave from link URL <a>（捕获阶段）
             listEl.addEventListener('mouseleave', (e) => {
-                const card = e.target.closest('.link-card');
-                if (!card || PreviewUI._isMobile) return;
+                const anchor = e.target.closest('.link-url a');
+                if (!anchor || PreviewUI._isMobile) return;
                 clearTimeout(this._showTimer);
                 this._hideTimer = setTimeout(() => PreviewUI.hide(), CFG.HIDE_DELAY);
             }, true);

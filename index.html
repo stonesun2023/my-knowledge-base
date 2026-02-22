@@ -2288,6 +2288,74 @@
         const inputTitle = document.getElementById('inputTitle');
         const inputNote  = document.getElementById('inputNote');
         const saveBtn    = document.getElementById('saveBtn');
+
+        // ==========================================
+        // P1: URL 输入框自动抓取标题+描述
+        // ==========================================
+        let fetchTimer = null;
+        let autoFilledTitle = false; // 标记是否是自动填充的，防止覆盖用户手动输入
+
+        // URL 输入框状态指示器
+        const fetchStatus = document.createElement('span');
+        fetchStatus.id = 'fetchStatus';
+        fetchStatus.style.cssText = 'font-size:12px;margin-left:8px;color:var(--text-secondary);';
+        inputUrl.parentNode.appendChild(fetchStatus);
+
+        // P1 + P2: URL 输入监听（防抖 800ms）
+        inputUrl.addEventListener('input', function() {
+            clearTimeout(fetchTimer);
+            const url = inputUrl.value.trim();
+
+            // 动态导入 LinkFetcher
+            import('./src/utils/LinkFetcher.js').then(function(module) {
+                const LinkFetcher = module.LinkFetcher;
+
+                if (!LinkFetcher.isValidUrl(url)) {
+                    fetchStatus.textContent = '';
+                    return;
+                }
+
+                fetchStatus.textContent = '⏳ 正在获取页面信息...';
+
+                fetchTimer = setTimeout(async function() {
+                    const data = await LinkFetcher.fetch(url);
+                    if (!data) {
+                        fetchStatus.textContent = '⚠️ 获取失败，请手动填写';
+                        return;
+                    }
+
+                    // 仅在标题为空或是上次自动填充时才覆盖
+                    if (data.title && (!inputTitle.value || autoFilledTitle)) {
+                        inputTitle.value = data.title;
+                        autoFilledTitle = true;
+                    }
+                    // 描述字段填充到笔记
+                    if (data.description && !inputNote.value) {
+                        inputNote.value = data.description;
+                    }
+
+                    fetchStatus.textContent = '✅ 信息已自动填充';
+
+                    // P2：触发 AI 标签建议（联动）
+                    triggerAITagSuggestion(url, data.title, data.description);
+
+                }, 800);
+            });
+        });
+
+        // 用户手动修改标题时，取消自动填充标记
+        inputTitle.addEventListener('input', function() {
+            autoFilledTitle = false;
+        });
+
+        // P2: 触发 AI 标签建议
+        function triggerAITagSuggestion(url, title, description) {
+            // 通过 appModule 暴露的 tagSuggesterUI 实例调用
+            const suggesterUI = window.appModule?.tagSuggesterUI;
+            if (suggesterUI && typeof suggesterUI.triggerFromFormData === 'function') {
+                suggesterUI.triggerFromFormData(url, title, description);
+            }
+        }
         const addTagButtons = document.querySelectorAll('#addTagButtons .tag-btn');
         const countLabel = document.getElementById('countLabel');
         const filterBar  = document.getElementById('filterBar');
@@ -2344,6 +2412,13 @@
             AppState.set('filters.tag', '全部', { persist: false });
             AppState.set('filters.searchKeyword', '', { persist: false });
             searchInput.value = '';
+
+            // 清空 P1+P2 状态
+            const suggestionArea = document.getElementById('formTagSuggestion');
+            if (suggestionArea) suggestionArea.style.display = 'none';
+            const fetchStatusEl = document.getElementById('fetchStatus');
+            if (fetchStatusEl) fetchStatusEl.textContent = '';
+            autoFilledTitle = false;
 
             renderAll();
         };

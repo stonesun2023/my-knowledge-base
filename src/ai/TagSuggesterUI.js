@@ -296,6 +296,104 @@ class TagSuggesterUI {
     }
 
     /**
+     * P2 联动入口：从表单数据直接触发 AI 标签建议
+     * 在添加链接表单区展示标签建议（而非卡片上）
+     * @param {string} url
+     * @param {string} title
+     * @param {string} description
+     */
+    async triggerFromFormData(url, title, description) {
+        // 检查 AI 是否已配置
+        if (!aiService.isConfigured()) {
+            console.log('[TagSuggesterUI] AI 未配置，跳过表单标签建议');
+            return;
+        }
+
+        // 找到表单区的标签建议容器，没有则创建
+        let suggestionArea = document.getElementById('formTagSuggestion');
+        if (!suggestionArea) {
+            suggestionArea = document.createElement('div');
+            suggestionArea.id = 'formTagSuggestion';
+            suggestionArea.style.cssText = 'margin-top:8px;padding:10px 12px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border-color);display:none;';
+            
+            // 插入到标签选择区上方
+            const tagSection = document.querySelector('.tag-selector');
+            if (tagSection) {
+                tagSection.parentNode.insertBefore(suggestionArea, tagSection);
+            }
+        }
+
+        suggestionArea.style.display = 'block';
+        suggestionArea.innerHTML = '<span style="font-size:13px;color:var(--text-secondary);">🤖 AI 正在推荐标签...</span>';
+
+        try {
+            // 构造 link 对象传给 TagSuggester
+            const linkData = { url, title, note: description };
+            const result = await tagSuggester.suggest(linkData);
+            const tags = result.tags;
+
+            if (!tags || tags.length === 0) {
+                suggestionArea.style.display = 'none';
+                return;
+            }
+
+            // 渲染可点击的标签建议（点击即选中该标签）
+            suggestionArea.innerHTML = `
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">🤖 AI 推荐标签（点击选中）：</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    ${tags.map(tag => `
+                        <button class="form-tag-suggestion-btn" 
+                            data-tag="${tag}"
+                            style="padding:4px 12px;border-radius:12px;border:1px solid var(--accent-color);
+                                   background:transparent;color:var(--accent-color);cursor:pointer;font-size:13px;
+                                   transition:all 0.15s ease;">
+                            ${tag}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            // 绑定点击事件：点击标签后，选中对应的标签按钮
+            suggestionArea.querySelectorAll('.form-tag-suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tag = btn.dataset.tag;
+                    this._selectFormTag(tag);
+                    
+                    // 更新按钮样式为已选中
+                    suggestionArea.querySelectorAll('.form-tag-suggestion-btn').forEach(b => {
+                        b.style.background = 'transparent';
+                        b.style.color = 'var(--accent-color)';
+                    });
+                    btn.style.background = 'var(--accent-color)';
+                    btn.style.color = '#fff';
+                });
+            });
+
+        } catch (e) {
+            console.warn('[TagSuggesterUI] 表单标签建议失败:', e);
+            suggestionArea.innerHTML = `<span style="font-size:12px;color:var(--text-tertiary);">⚠️ AI 标签建议失败</span>`;
+            setTimeout(() => {
+                suggestionArea.style.display = 'none';
+            }, 2000);
+        }
+    }
+
+    /**
+     * 选中表单区的标签按钮
+     * @param {string} tag
+     */
+    _selectFormTag(tag) {
+        // 找到对应标签的按钮并触发点击
+        const tagButtons = document.querySelectorAll('#addTagButtons .tag-btn');
+        tagButtons.forEach(btn => {
+            const btnTag = btn.dataset.tag;
+            if (btnTag === tag && !btn.classList.contains('selected')) {
+                btn.click();
+            }
+        });
+    }
+
+    /**
      * 获取样式（注入到页面）
      * @returns {string} CSS 字符串
      */

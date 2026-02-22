@@ -2374,24 +2374,18 @@
         const linkList   = document.getElementById('linkList');
 
         // ==========================================
-        // 添加表单 - 标签选择
+        // 添加表单 - 标签选择（多选模式）
         // ==========================================
         addTagButtons.forEach(function(btn) {
             btn.onclick = function() {
-                const cur = AppState.get('ui.selectedAddTag');
-                if (cur === this.dataset.tag) {
-                    AppState.set('ui.selectedAddTag', '', { persist: false });
-                    this.classList.remove('selected');
-                } else {
-                    addTagButtons.forEach(b => b.classList.remove('selected'));
-                    AppState.set('ui.selectedAddTag', this.dataset.tag, { persist: false });
-                    this.classList.add('selected');
-                }
+                // 切换选中状态（多选）
+                this.classList.toggle('selected');
+                // 不再操作 AppState.selectedAddTag（单值），改用读取所有选中按钮
             };
         });
 
         // ==========================================
-        // 保存链接（通过 AppState）
+        // 保存链接（通过 AppState）- 支持多标签
         // ==========================================
         saveBtn.onclick = function() {
             const url   = inputUrl.value.trim();
@@ -2403,12 +2397,18 @@
                 return;
             }
 
+            // 读取所有选中的标签按钮（多选模式）
+            const selectedTags = Array.from(
+                document.querySelectorAll('#addTagButtons .tag-btn.selected')
+            ).map(b => b.dataset.tag);
+
             const newLink = {
                 id: Date.now(),
                 url,
                 title,
                 note,
-                tag: AppState.get('ui.selectedAddTag'),
+                tag: selectedTags[0] || '',                    // 向后兼容取第一个
+                tags: selectedTags,                            // 新增数组字段
                 time: new Date().toLocaleString('zh-CN'),
             };
 
@@ -2454,14 +2454,26 @@
         }
 
         // ==========================================
-        // 渲染标签筛选栏
+        // 辅助函数：获取链接的标签数组（向后兼容）
+        // ==========================================
+        function getLinkTags(link) {
+            if (link.tags && link.tags.length > 0) return link.tags;
+            if (link.tag) return [link.tag];
+            return [];
+        }
+
+        // ==========================================
+        // 渲染标签筛选栏（支持多标签匹配）
         // ==========================================
         function renderFilterBar() {
             const links      = AppState.get('data.links');
             const activeFilter = AppState.get('filters.tag');
             const usedTags   = [];
             links.forEach(function(link) {
-                if (link.tag && !usedTags.includes(link.tag)) usedTags.push(link.tag);
+                const tags = getLinkTags(link);
+                tags.forEach(function(tag) {
+                    if (tag && !usedTags.includes(tag)) usedTags.push(tag);
+                });
             });
 
             if (usedTags.length === 0) { filterBar.innerHTML = ''; return; }
@@ -2470,7 +2482,7 @@
             const allClass = activeFilter === '全部' ? 'tag-btn selected' : 'tag-btn';
             html += `<button class="${allClass}" onclick="setFilter('全部')">📚 全部（${links.length}）</button>`;
             usedTags.forEach(function(tag) {
-                const count = links.filter(l => l.tag === tag).length;
+                const count = links.filter(l => getLinkTags(l).includes(tag)).length;
                 const btnClass = activeFilter === tag ? 'tag-btn selected' : 'tag-btn';
                 html += `<button class="${btnClass}" onclick="setFilter('${tag}')">🏷️ ${tag}（${count}）</button>`;
             });
@@ -2497,7 +2509,7 @@
             updateCount(links, activeFilter, searchKeyword);
 
             let result = links;
-            if (activeFilter !== '全部') result = links.filter(l => l.tag === activeFilter);
+            if (activeFilter !== '全部') result = links.filter(l => getLinkTags(l).includes(activeFilter));
             if (searchKeyword) {
                 result = result.filter(function(link) {
                     return (link.title && link.title.toLowerCase().includes(searchKeyword)) ||
@@ -2530,8 +2542,12 @@
                     '工具': 'background:#d3e5ef;color:#2f7da0',
                     '其他': 'background:#f1f0ef;color:#787774',
                 };
-                const tagStyle = link.tag ? (tagColorMap[link.tag] || 'background:#f1f0ef;color:#787774') : '';
-                const tagHTML = link.tag ? `<span class="card-tag" style="${tagStyle}">${link.tag}</span>` : '';
+                // 渲染所有标签（支持多标签）
+                const linkTags = getLinkTags(link);
+                const tagHTML = linkTags.map(function(t) {
+                    const style = tagColorMap[t] || 'background:#f1f0ef;color:#787774';
+                    return `<span class="card-tag" style="${style}">${t}</span>`;
+                }).join(' ');
                 const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
                 const url   = searchKeyword ? highlight(link.url,   searchKeyword) : escapeHTML(link.url);
                 const note  = searchKeyword ? highlight(link.note,  searchKeyword) : escapeHTML(link.note);
@@ -2597,7 +2613,7 @@
                 searchKeyword = AppState.get('filters.searchKeyword');
             }
             let filtered = links;
-            if (activeFilter !== '全部') filtered = links.filter(l => l.tag === activeFilter);
+            if (activeFilter !== '全部') filtered = links.filter(l => getLinkTags(l).includes(activeFilter));
             if (searchKeyword) {
                 filtered = filtered.filter(l =>
                     (l.title && l.title.toLowerCase().includes(searchKeyword)) ||
@@ -3232,7 +3248,7 @@
             }
         });
 
-        // 批量修改标签（通过 AppState）
+        // 批量修改标签（通过 AppState）- 支持多标签
         function batchSetTag(tag) {
             document.getElementById('batchTagMenu').classList.remove('open');
             const n = Selection.selected.size;
@@ -3240,9 +3256,15 @@
             // 保存当前选中集合（renderAll 不会清除 Selection.selected）
             const savedSelected = new Set(Selection.selected);
             const links = AppState.get('data.links');
-            const newLinks = links.map((link, i) =>
-                savedSelected.has(i) ? Object.assign({}, link, { tag }) : link
-            );
+            const newLinks = links.map((link, i) => {
+                if (!savedSelected.has(i)) return link;
+                // 更新 tag（向后兼容）和 tags 数组
+                const newTags = tag ? [tag] : [];
+                return Object.assign({}, link, { 
+                    tag: newTags[0] || '', 
+                    tags: newTags 
+                });
+            });
             AppState.setLinks(newLinks, 'batchSetTag');
             renderAll();
             // 重新恢复选中状态（renderAll 会重建 DOM，需要重新标记 class 和文字）

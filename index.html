@@ -1616,6 +1616,108 @@
                 padding: 16px 20px;
             }
         }
+
+        /* ==========================================
+           标签管理 Modal
+        ========================================== */
+        .tag-manage-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-btn);
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 6px;
+            vertical-align: middle;
+            transition: background 0.15s;
+        }
+        .tag-manage-btn:hover { background: var(--bg-card-hover); }
+
+        .tag-manager-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tag-manager-modal {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            width: 360px;
+            max-width: 90vw;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px var(--shadow-heavy);
+        }
+        .tag-manager-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .tag-manager-close {
+            background: none; border: none;
+            cursor: pointer; font-size: 18px;
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .tag-manager-close:hover { background: var(--bg-card-hover); }
+
+        .tag-manager-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tag-manager-item:last-child { border-bottom: none; }
+        .tag-manager-name {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        .tag-color-swatches {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .tag-color-swatch {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s, border-color 0.1s;
+            flex-shrink: 0;
+        }
+        .tag-color-swatch:hover { transform: scale(1.2); }
+        .tag-color-swatch.active { border-color: var(--accent-color); }
+        .tag-color-custom {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 2px dashed var(--border-color);
+            cursor: pointer;
+            background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+            opacity: 0.8;
+            flex-shrink: 0;
+        }
+        .tag-delete-btn {
+            background: none; border: none;
+            color: var(--text-tertiary);
+            cursor: pointer; font-size: 14px;
+            padding: 2px 4px; border-radius: 4px;
+        }
+        .tag-delete-btn:hover { color: #e53e3e; background: #fff5f5; }
+        .tag-manager-tip {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 12px;
+            text-align: center;
+        }
     </style>
     <!-- 知识图谱模块 -->
     <script src="src/graph.js"></script>
@@ -1710,6 +1812,7 @@
 
             <div class="tag-selector">
                 <label>🏷️ 选择标签（可选）：</label>
+                <button class="tag-manage-btn" id="tagManagerBtn" title="管理标签颜色">🎨</button>
                 <div class="tag-selector-buttons" id="addTagButtons">
                     <button class="tag-btn" data-tag="编程">编程</button>
                     <button class="tag-btn" data-tag="设计">设计</button>
@@ -2504,6 +2607,148 @@
         restoreCustomTags();
 
         // ==========================================
+        // 标签颜色管理
+        // ==========================================
+
+        // Notion 风格预设色板 [bg, label]
+        const TAG_COLOR_PRESETS = [
+            ['#fdecc8', '#c97c24'],
+            ['#d3e5ef', '#2f7da0'],
+            ['#fadec9', '#c94f28'],
+            ['#dbeddb', '#2d6a2d'],
+            ['#e8def8', '#6940a5'],
+            ['#f1f0ef', '#787774'],
+            ['#ffe2dd', '#c4441b'],
+            ['#d0e8ff', '#1a6fb5'],
+        ];
+
+        function getTagColors() {
+            return AppState.get('data.tagColors') || {};
+        }
+
+        function setTagColor(tagName, bgColor, textColor) {
+            const colors = getTagColors();
+            colors[tagName] = { bg: bgColor, text: textColor };
+            AppState.set('data.tagColors', colors);
+            applyAllTagColors();
+        }
+
+        function deleteCustomTag(tagName) {
+            // 从 customTags 移除
+            const customTags = (AppState.get('data.customTags') || []).filter(t => t !== tagName);
+            AppState.set('data.customTags', customTags);
+            // 从 tagColors 移除
+            const colors = getTagColors();
+            delete colors[tagName];
+            AppState.set('data.tagColors', colors);
+            // 移除 DOM 按钮
+            const btn = document.querySelector(`#addTagButtons .tag-btn[data-tag="${tagName}"]`);
+            if (btn) btn.remove();
+            // 重新渲染列表和筛选栏
+            renderAll();
+            // 刷新 Modal 列表
+            renderTagManagerList();
+        }
+
+        function getAllTags() {
+            const preset = ['编程', '设计', 'AI', '学习', '工作', '工具', '其他'];
+            const custom = AppState.get('data.customTags') || [];
+            return [...preset, ...custom];
+        }
+
+        function renderTagManagerList() {
+            const list = document.getElementById('tagManagerList');
+            if (!list) return;
+            const colors = getTagColors();
+            const allTags = getAllTags();
+            const presetTags = ['编程', '设计', 'AI', '学习', '工作', '工具', '其他'];
+
+            list.innerHTML = allTags.map(tag => {
+                const isCustom = !presetTags.includes(tag);
+                const activeColor = colors[tag]?.bg || '';
+                const swatches = TAG_COLOR_PRESETS.map(([bg, text]) =>
+                    `<span class="tag-color-swatch${activeColor === bg ? ' active' : ''}"
+                          style="background:${bg}"
+                          data-bg="${bg}" data-text="${text}" data-tag="${tag}"></span>`
+                ).join('');
+                const deleteBtn = isCustom
+                    ? `<button class="tag-delete-btn" data-delete-tag="${tag}" title="删除标签">🗑</button>`
+                    : '';
+                return `
+                    <div class="tag-manager-item">
+                        <span class="tag-manager-name">🏷️ ${tag}</span>
+                        <div class="tag-color-swatches">
+                            ${swatches}
+                            <input type="color" class="tag-color-custom" data-tag="${tag}"
+                                   title="自定义颜色" value="${activeColor || '#ffffff'}">
+                        </div>
+                        ${deleteBtn}
+                    </div>`;
+            }).join('');
+
+            // 绑定色块点击
+            list.querySelectorAll('.tag-color-swatch').forEach(swatch => {
+                swatch.onclick = () => {
+                    setTagColor(swatch.dataset.tag, swatch.dataset.bg, swatch.dataset.text);
+                    renderTagManagerList(); // 刷新 active 状态
+                };
+            });
+
+            // 绑定自定义颜色 input
+            list.querySelectorAll('input[type="color"]').forEach(input => {
+                input.oninput = (e) => {
+                    setTagColor(input.dataset.tag, e.target.value, '#ffffff');
+                };
+            });
+
+            // 绑定删除按钮
+            list.querySelectorAll('.tag-delete-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const tag = btn.dataset.deleteTag;
+                    if (confirm(`确认删除标签「${tag}」？`)) deleteCustomTag(tag);
+                };
+            });
+        }
+
+        function applyAllTagColors() {
+            const colors = getTagColors();
+            // 更新表单区 tag-btn
+            document.querySelectorAll('#addTagButtons .tag-btn').forEach(btn => {
+                const c = colors[btn.dataset.tag];
+                if (c) {
+                    btn.style.setProperty('--tag-btn-bg', c.bg);
+                    btn.style.setProperty('--tag-btn-color', c.text);
+                    btn.style.background = c.bg;
+                    btn.style.color = c.text;
+                    btn.style.borderColor = c.bg;
+                } else {
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }
+            });
+            // 更新筛选栏和卡片 badge（触发重渲染）
+            if (window.renderAll) renderAll();
+        }
+
+        // 打开/关闭 Modal
+        const tagManagerBtn = document.getElementById('tagManagerBtn');
+        const tagManagerOverlay = document.getElementById('tagManagerOverlay');
+        const tagManagerClose = document.getElementById('tagManagerClose');
+
+        tagManagerBtn.onclick = () => {
+            renderTagManagerList();
+            tagManagerOverlay.style.display = 'flex';
+        };
+        tagManagerClose.onclick = () => { tagManagerOverlay.style.display = 'none'; };
+        tagManagerOverlay.onclick = (e) => {
+            if (e.target === tagManagerOverlay) tagManagerOverlay.style.display = 'none';
+        };
+
+        // 页面初始化时应用标签颜色
+        applyAllTagColors();
+
+        // ==========================================
         // 保存链接（通过 AppState）- 支持多标签
         // ==========================================
         saveBtn.onclick = function() {
@@ -2661,10 +2906,18 @@
                     '工具': 'background:#d3e5ef;color:#2f7da0',
                     '其他': 'background:#f1f0ef;color:#787774',
                 };
+                // 获取用户自定义标签颜色
+                const customColors = getTagColors();
                 // 渲染所有标签（支持多标签）
                 const linkTags = getLinkTags(link);
                 const tagHTML = linkTags.map(function(t) {
-                    const style = tagColorMap[t] || 'background:#f1f0ef;color:#787774';
+                    // 优先使用用户自定义颜色，其次使用预设颜色
+                    let style;
+                    if (customColors[t]) {
+                        style = `background:${customColors[t].bg};color:${customColors[t].text}`;
+                    } else {
+                        style = tagColorMap[t] || 'background:#f1f0ef;color:#787774';
+                    }
                     return `<span class="card-tag" style="${style}">${t}</span>`;
                 }).join(' ');
                 const title = searchKeyword ? highlight(link.title, searchKeyword) : escapeHTML(link.title);
@@ -3806,5 +4059,19 @@
             });
         }
     </script>
+
+    <!-- 标签管理 Modal -->
+    <div class="tag-manager-overlay" id="tagManagerOverlay" style="display:none">
+      <div class="tag-manager-modal">
+        <div class="tag-manager-header">
+          <span>🎨 管理标签</span>
+          <button class="tag-manager-close" id="tagManagerClose">✕</button>
+        </div>
+        <div class="tag-manager-list" id="tagManagerList">
+          <!-- 动态渲染 -->
+        </div>
+        <p class="tag-manager-tip">点击色块选色，自定义标签可删除</p>
+      </div>
+    </div>
 </body>
 </html>

@@ -2772,9 +2772,14 @@
             inputTitle.value = link.title;
             inputNote.value  = link.note || '';
 
-            const tag = link.tag || '';
-            AppState.set('ui.selectedAddTag', tag, { persist: false });
-            addTagButtons.forEach(btn => btn.classList.toggle('selected', btn.dataset.tag === tag));
+            // 确保自定义标签按钮已渲染
+            restoreCustomTags();
+
+            // 回显多标签（link.tags 数组优先，兼容旧 link.tag）
+            const linkTags = getLinkTags(link);
+            document.querySelectorAll('#addTagButtons .tag-btn').forEach(btn => {
+                btn.classList.toggle('selected', linkTags.includes(btn.dataset.tag));
+            });
 
             const newLinks = links.filter((_, i) => i !== index);
             AppState.setLinks(newLinks, 'editLink.remove');

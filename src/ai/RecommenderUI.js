@@ -263,26 +263,26 @@ export class RecommenderUI {
                 font-weight: 500;
             }
 
-            /* 触发按钮 */
+            /* 触发按钮 - 与摘要、智能推荐按钮样式一致 */
             .ai-recommend-trigger {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
-                padding: 6px 12px;
-                border-radius: 8px;
+                gap: 4px;
+                padding: 6px 14px;
+                border-radius: 4px;
                 border: 1px solid var(--border-color);
-                background: var(--bg-card);
+                background: transparent;
                 color: var(--text-secondary);
                 font-size: 13px;
                 cursor: pointer;
-                transition: all 0.2s ease;
-                margin-top: 8px;
+                transition: all 0.15s ease;
+                font-family: inherit;
             }
 
             .ai-recommend-trigger:hover {
-                border-color: var(--accent-color);
-                color: var(--accent-color);
-                background: var(--bg-card-hover);
+                background: var(--tag-bg);
+                color: var(--text-primary);
+                border-color: #d0d0ce;
             }
 
             /* 移动端适配 */

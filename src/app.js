@@ -424,10 +424,46 @@ function initTagSuggester() {
     styleEl.textContent = TagSuggesterUI.getStyles();
     document.head.appendChild(styleEl);
 
-    // 监听 AI 标签选择事件
+    // 监听 AI 标签选择事件（多选模式：传递标签数组）
+    document.addEventListener('ai-tags-selected', (e) => {
+        const { linkId, tags } = e.detail;
+        console.log('[App] AI 标签已选择:', { linkId, tags });
+        
+        // 更新链接标签（合并而非替换）
+        if (window.AppState) {
+            const links = AppState.get('data.links');
+            const newLinks = links.map((link, i) => {
+                // 尝试按 id 或索引匹配
+                if (link.id == linkId || i == linkId) {
+                    // 获取原有标签（支持字符串或数组）
+                    const originalTags = link.tags 
+                        ? (Array.isArray(link.tags) ? link.tags : [link.tags])
+                        : (link.tag ? [link.tag] : []);
+                    // 合并并去重
+                    const mergedTags = Array.from(new Set([...originalTags, ...tags]));
+                    // 返回更新后的链接（保持 tags 数组格式，同时保留 tag 字段兼容）
+                    return { ...link, tags: mergedTags, tag: mergedTags.join(', ') };
+                }
+                return link;
+            });
+            AppState.setLinks(newLinks, 'ai-tags-update');
+            
+            // 刷新列表
+            if (window.renderAll) {
+                renderAll();
+            }
+            
+            // 显示提示
+            if (window.Selection && Selection.toast) {
+                Selection.toast(`✅ 已添加标签：${tags.join('、')}`);
+            }
+        }
+    });
+
+    // 兼容旧的单选事件
     document.addEventListener('ai-tag-selected', (e) => {
         const { linkId, tag } = e.detail;
-        console.log('[App] AI 标签已选择:', { linkId, tag });
+        console.log('[App] AI 标签已选择（单选）:', { linkId, tag });
         
         // 更新链接标签
         if (window.AppState) {

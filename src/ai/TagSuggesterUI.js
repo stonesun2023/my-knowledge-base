@@ -151,17 +151,19 @@ class TagSuggesterUI {
             });
         });
 
-        // 绑定确认按钮：收集所有 selected 的 chip，逐个触发事件
+        // 绑定确认按钮：收集所有 selected 的 chip，一次性触发事件（传递标签数组）
         container.querySelector('.ai-tag-confirm-btn')?.addEventListener('click', () => {
             const selectedChips = container.querySelectorAll('.ai-tag-chip.selected');
-            selectedChips.forEach(chip => {
-                const tag = chip.dataset.tag;
-                const event = new CustomEvent('ai-tag-selected', {
-                    detail: { linkId, tag },
+            const selectedTags = Array.from(selectedChips).map(chip => chip.dataset.tag);
+            
+            if (selectedTags.length > 0) {
+                // 触发自定义事件，传递标签数组
+                const event = new CustomEvent('ai-tags-selected', {
+                    detail: { linkId, tags: selectedTags },
                     bubbles: true
                 });
-                chip.dispatchEvent(event);
-            });
+                container.dispatchEvent(event);
+            }
             // 关闭气泡
             container.remove();
         });

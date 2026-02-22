@@ -2732,22 +2732,35 @@
             if (window.renderAll) renderAll();
         }
 
-        // 打开/关闭 Modal
-        const tagManagerBtn = document.getElementById('tagManagerBtn');
-        const tagManagerOverlay = document.getElementById('tagManagerOverlay');
-        const tagManagerClose = document.getElementById('tagManagerClose');
+        // 打开/关闭 Modal（延迟绑定，确保 DOM 已加载）
+        function initTagManagerModal() {
+            const tagManagerBtn = document.getElementById('tagManagerBtn');
+            const tagManagerOverlay = document.getElementById('tagManagerOverlay');
+            const tagManagerClose = document.getElementById('tagManagerClose');
 
-        tagManagerBtn.onclick = () => {
-            renderTagManagerList();
-            tagManagerOverlay.style.display = 'flex';
-        };
-        tagManagerClose.onclick = () => { tagManagerOverlay.style.display = 'none'; };
-        tagManagerOverlay.onclick = (e) => {
-            if (e.target === tagManagerOverlay) tagManagerOverlay.style.display = 'none';
-        };
+            if (!tagManagerBtn || !tagManagerOverlay || !tagManagerClose) {
+                console.warn('[TagManager] Modal 元素未找到，稍后重试');
+                return false;
+            }
 
-        // 页面初始化时应用标签颜色
-        applyAllTagColors();
+            tagManagerBtn.onclick = () => {
+                renderTagManagerList();
+                tagManagerOverlay.style.display = 'flex';
+            };
+            tagManagerClose.onclick = () => { tagManagerOverlay.style.display = 'none'; };
+            tagManagerOverlay.onclick = (e) => {
+                if (e.target === tagManagerOverlay) tagManagerOverlay.style.display = 'none';
+            };
+
+            // 页面初始化时应用标签颜色
+            applyAllTagColors();
+            return true;
+        }
+
+        // 尝试立即初始化，如果失败则在 DOMContentLoaded 后重试
+        if (!initTagManagerModal()) {
+            document.addEventListener('DOMContentLoaded', initTagManagerModal);
+        }
 
         // ==========================================
         // 保存链接（通过 AppState）- 支持多标签

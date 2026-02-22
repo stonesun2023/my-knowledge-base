@@ -1593,11 +1593,12 @@
             }
 
             #themeToggle {
-                top: 10px;
-                right: 10px;
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
+                top: 12px;
+                right: 12px;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                z-index: 999;
             }
 
             .stats-overview {
@@ -1614,6 +1615,16 @@
 
             .stats-header {
                 padding: 16px 20px;
+            }
+
+            /* 隐藏键盘快捷键提示栏 */
+            #shortcutBar {
+                display: none !important;
+            }
+
+            /* 移动端不需要为快捷键提示栏留出底部空间 */
+            body {
+                padding-bottom: 20px;
             }
         }
 
@@ -1717,6 +1728,87 @@
             color: var(--text-tertiary);
             margin-top: 12px;
             text-align: center;
+        }
+
+        /* ==========================================
+           Fix 3: 链接卡片移动端字体和间距优化
+        ========================================== */
+        @media (max-width: 768px) {
+            .link-card {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            .card-content h3 {
+                font-size: 15px;
+                line-height: 1.4;
+                margin-bottom: 6px;
+            }
+            .link-url, .link-note, .link-time {
+                font-size: 12px;
+            }
+            .card-actions {
+                gap: 8px;
+                margin-top: 8px;
+            }
+            .ai-actions-row {
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .edit-btn, .delete-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* ==========================================
+           Fix 4: 知识图谱移动端优化
+        ========================================== */
+        @media (max-width: 768px) {
+            #graph-container,
+            .graph-container {
+                height: 60vh !important;
+                min-height: 300px;
+            }
+        }
+
+        /* 浅色模式下图谱背景与页面一致 */
+        body:not(.dark-mode) #graph-container,
+        body:not(.dark-mode) .graph-container {
+            background: var(--bg-secondary) !important;
+        }
+        body:not(.dark-mode) #graph-container svg,
+        body:not(.dark-mode) .graph-container svg {
+            background: var(--bg-secondary) !important;
+        }
+
+        /* ==========================================
+           Fix 3: 链接卡片图片预览（顶部大图）
+        ========================================== */
+        .card-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: var(--radius-card) var(--radius-card) 0 0;
+            display: block;
+            background: var(--bg-card-hover);
+        }
+
+        .card-image-wrap {
+            margin: -20px -20px 12px -20px;
+            border-radius: var(--radius-card) var(--radius-card) 0 0;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        @media (max-width: 768px) {
+            .card-image {
+                height: 140px;
+            }
+            
+            .card-image-wrap {
+                margin: -12px -12px 10px -12px;
+            }
         }
     </style>
     <!-- 知识图谱模块 -->
@@ -1836,6 +1928,59 @@
             我的收藏 📚
             <span id="countLabel" style="color: var(--accent-color); font-size: 24px; font-weight: 400;"></span>
         </h2>
+
+        <div id="collections">
+            <div id="filterBar"></div>
+            <div class="search-container">
+                <div class="search-row">
+                    <input type="text" id="searchInput" placeholder="🔍 搜索链接（标题、URL、笔记...）">
+                    <button class="advanced-search-toggle" id="advancedSearchToggle" title="高级搜索">
+                        ⚙️
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 高级搜索面板 -->
+            <div id="advanced-search-panel" class="advanced-search-panel"></div>
+
+            <!-- 批量操作栏（选中链接时显示） -->
+            <div id="batchBar">
+                <span class="batch-count" id="batchCount">已选 0 个</span>
+                <div class="batch-divider"></div>
+
+                <!-- 修改标签下拉 -->
+                <div class="batch-tag-dropdown">
+                    <button class="batch-btn tag-btn-style" id="batchTagBtn" onclick="toggleBatchTagMenu()">
+                        🏷️ 修改标签 ▾
+                    </button>
+                    <div class="batch-tag-menu" id="batchTagMenu">
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('编程')">💻 编程</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('设计')">🎨 设计</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('AI')">🤖 AI</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('学习')">📖 学习</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('工作')">💼 工作</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('工具')">🔧 工具</div>
+                        <div class="batch-tag-menu-item" onclick="batchSetTag('其他')">📌 其他</div>
+                        <div class="batch-tag-menu-item clear-tag" onclick="batchSetTag('')">✕ 清除标签</div>
+                    </div>
+                </div>
+
+                <button class="batch-btn export-btn-style" onclick="batchExport()">📤 导出</button>
+                <button class="batch-btn danger" onclick="batchDelete()">🗑️ 删除</button>
+                <button class="batch-btn cancel" onclick="exitSelectionMode()">✕ 取消选择</button>
+            </div>
+
+            <!-- 视图切换 Tab Bar -->
+            <div id="view-tabs" style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg-secondary,#1e293b);padding:4px;border-radius:10px;width:fit-content;">
+                <button id="tab-list" onclick="switchView('list')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--accent-color,#1a1a1a);color:#fff;transition:all 0.2s;">🔗 列表</button>
+                <button id="tab-graph" onclick="switchView('graph')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🗺️ 图谱</button>
+            </div>
+
+            <div id="linkList"></div>
+
+            <!-- 知识图谱容器 -->
+            <div id="graph-container" style="display:none;width:100%;height:600px;border-radius:12px;overflow:hidden;border:1px solid #1e293b;"></div>
+        </div>
 
         <!-- 数据统计面板 -->
         <div id="statsPanel">
@@ -1985,59 +2130,6 @@
             </button>
         </div>
         <input type="file" id="importFile" accept=".json" style="display: none;">
-
-        <div id="collections">
-            <div id="filterBar"></div>
-            <div class="search-container">
-                <div class="search-row">
-                    <input type="text" id="searchInput" placeholder="🔍 搜索链接（标题、URL、笔记...）">
-                    <button class="advanced-search-toggle" id="advancedSearchToggle" title="高级搜索">
-                        ⚙️
-                    </button>
-                </div>
-            </div>
-            
-            <!-- 高级搜索面板 -->
-            <div id="advanced-search-panel" class="advanced-search-panel"></div>
-
-            <!-- 批量操作栏（选中链接时显示） -->
-            <div id="batchBar">
-                <span class="batch-count" id="batchCount">已选 0 个</span>
-                <div class="batch-divider"></div>
-
-                <!-- 修改标签下拉 -->
-                <div class="batch-tag-dropdown">
-                    <button class="batch-btn tag-btn-style" id="batchTagBtn" onclick="toggleBatchTagMenu()">
-                        🏷️ 修改标签 ▾
-                    </button>
-                    <div class="batch-tag-menu" id="batchTagMenu">
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('编程')">💻 编程</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('设计')">🎨 设计</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('AI')">🤖 AI</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('学习')">📖 学习</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('工作')">💼 工作</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('工具')">🔧 工具</div>
-                        <div class="batch-tag-menu-item" onclick="batchSetTag('其他')">📌 其他</div>
-                        <div class="batch-tag-menu-item clear-tag" onclick="batchSetTag('')">✕ 清除标签</div>
-                    </div>
-                </div>
-
-                <button class="batch-btn export-btn-style" onclick="batchExport()">📤 导出</button>
-                <button class="batch-btn danger" onclick="batchDelete()">🗑️ 删除</button>
-                <button class="batch-btn cancel" onclick="exitSelectionMode()">✕ 取消选择</button>
-            </div>
-
-            <!-- 视图切换 Tab Bar -->
-            <div id="view-tabs" style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg-secondary,#1e293b);padding:4px;border-radius:10px;width:fit-content;">
-                <button id="tab-list" onclick="switchView('list')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--accent-color,#1a1a1a);color:#fff;transition:all 0.2s;">🔗 列表</button>
-                <button id="tab-graph" onclick="switchView('graph')" style="padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--text-secondary,#94a3b8);transition:all 0.2s;">🗺️ 图谱</button>
-            </div>
-
-            <div id="linkList"></div>
-
-            <!-- 知识图谱容器 -->
-            <div id="graph-container" style="display:none;width:100%;height:600px;border-radius:12px;overflow:hidden;border:1px solid #1e293b;"></div>
-        </div>
     </div>
 
     <script>
@@ -2406,6 +2498,7 @@
         // ==========================================
         let fetchTimer = null;
         let autoFilledTitle = false; // 标记是否是自动填充的，防止覆盖用户手动输入
+        let autoFilledImage = '';    // 缓存自动抓取的图片 URL
 
         // URL 输入框状态指示器
         const fetchStatus = document.createElement('span');
@@ -2445,6 +2538,9 @@
                     if (data.description && !inputNote.value) {
                         inputNote.value = data.description;
                     }
+
+                    // 缓存图片 URL
+                    if (data.image) autoFilledImage = data.image;
 
                     fetchStatus.textContent = '✅ 信息已自动填充';
 
@@ -2787,6 +2883,7 @@
                 note,
                 tag: selectedTags[0] || '',                    // 向后兼容取第一个
                 tags: selectedTags,                            // 新增数组字段
+                image: autoFilledImage,                        // 保存抓取的图片
                 time: new Date().toLocaleString('zh-CN'),
             };
 
@@ -2808,6 +2905,7 @@
             const fetchStatusEl = document.getElementById('fetchStatus');
             if (fetchStatusEl) fetchStatusEl.textContent = '';
             autoFilledTitle = false;
+            autoFilledImage = '';  // 重置图片缓存
 
             renderAll();
         };
@@ -2952,6 +3050,15 @@
                     ? window.appModule.renderAIRecommendButton(link, realIndex) 
                     : '';
 
+                // 图片预览（顶部大图）
+                const imageHTML = link.image
+                    ? `<div class="card-image-wrap">
+                         <img class="card-image" src="${escapeHTML(link.image)}" 
+                              alt="" loading="lazy"
+                              onerror="this.closest('.card-image-wrap').style.display='none'">
+                       </div>`
+                    : '';
+
                 html += `
                     <div class="link-card${isSelected ? ' selected' : ''}" data-real-index="${realIndex}">
                         <div class="card-checkbox${isSelected ? ' checked' : ''}"
@@ -2959,6 +3066,7 @@
                             ${isSelected ? '✓' : ''}
                         </div>
                         <div class="card-content">
+                            ${imageHTML}
                             <h3>📎 ${title}</h3>
                             <p class="link-url">🔗 <a href="${escapeHTML(link.url)}" target="_blank">${url}</a></p>
                             <p class="link-note">📝 ${note || '（无笔记）'}</p>

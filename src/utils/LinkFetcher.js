@@ -5,9 +5,9 @@ export class LinkFetcher {
   static BASE_URL = 'https://api.microlink.io';
 
   /**
-   * 抓取 URL 的标题、描述、图标
+   * 抓取 URL 的标题、描述、图标、图片
    * @param {string} url
-   * @returns {Promise<{title:string, description:string, favicon:string}|null>}
+   * @returns {Promise<{title:string, description:string, favicon:string, image:string}|null>}
    */
   static async fetch(url) {
     try {
@@ -16,11 +16,12 @@ export class LinkFetcher {
       if (!res.ok) return null;
       const json = await res.json();
       if (json.status !== 'success') return null;
-      const { title, description, logo } = json.data;
+      const { title, description, logo, image } = json.data;
       return {
         title: title || '',
         description: description || '',
-        favicon: logo?.url || ''
+        favicon: logo?.url || '',
+        image: image?.url || ''
       };
     } catch (e) {
       console.warn('[LinkFetcher] 抓取失败:', e);

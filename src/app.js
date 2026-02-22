@@ -257,6 +257,15 @@ class AdvancedSearchManager {
             const url = escapeHTML(link.url);
             const note = escapeHTML(link.note);
 
+            // 图片预览（顶部大图）
+            const imageHTML = link.image
+                ? `<div class="card-image-wrap">
+                     <img class="card-image" src="${escapeHTML(link.image)}" 
+                          alt="" loading="lazy"
+                          onerror="this.closest('.card-image-wrap').style.display='none'">
+                   </div>`
+                : '';
+
             html += `
                 <div class="link-card${isSelected ? ' selected' : ''}" data-real-index="${realIndex}">
                     <div class="card-checkbox${isSelected ? ' checked' : ''}"
@@ -264,6 +273,7 @@ class AdvancedSearchManager {
                         ${isSelected ? '✓' : ''}
                     </div>
                     <div class="card-content">
+                        ${imageHTML}
                         <h3>📎 ${title}</h3>
                         <p class="link-url">🔗 <a href="${url}" target="_blank">${url}</a></p>
                         <p class="link-note">📝 ${note || '（无笔记）'}</p>

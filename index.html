@@ -2625,6 +2625,8 @@
         function getTagColors() {
             return AppState.get('data.tagColors') || {};
         }
+        // 暴露到全局供 app.js 使用
+        window.getTagColors = getTagColors;
 
         function setTagColor(tagName, bgColor, textColor) {
             const colors = getTagColors();
@@ -2845,10 +2847,13 @@
             let html = '';
             const allClass = activeFilter === '全部' ? 'tag-btn selected' : 'tag-btn';
             html += `<button class="${allClass}" onclick="setFilter('全部')">📚 全部（${links.length}）</button>`;
+            const tagColors = getTagColors();
             usedTags.forEach(function(tag) {
                 const count = links.filter(l => getLinkTags(l).includes(tag)).length;
                 const btnClass = activeFilter === tag ? 'tag-btn selected' : 'tag-btn';
-                html += `<button class="${btnClass}" onclick="setFilter('${tag}')">🏷️ ${tag}（${count}）</button>`;
+                const c = tagColors[tag];
+                const style = c ? `style="background:${c.bg};color:${c.text};border-color:${c.bg}"` : '';
+                html += `<button class="${btnClass}" ${style} onclick="setFilter('${tag}')">🏷️ ${tag}（${count}）</button>`;
             });
             filterBar.innerHTML = html;
         }

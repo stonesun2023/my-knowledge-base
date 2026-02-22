@@ -217,10 +217,42 @@ class AdvancedSearchManager {
         const links = AppState.get('data.links');
         let html = '';
         
+        // 辅助函数：获取链接的标签数组（向后兼容）
+        function getLinkTags(link) {
+            if (link.tags && link.tags.length > 0) return link.tags;
+            if (link.tag) return [link.tag];
+            return [];
+        }
+
+        // 预设标签颜色映射
+        const tagColorMap = {
+            'AI':   'background:#fdecc8;color:#c97c24',
+            '编程': 'background:#d3e5ef;color:#2f7da0',
+            '设计': 'background:#fadec9;color:#c94f28',
+            '学习': 'background:#dbeddb;color:#2d6a2d',
+            '工作': 'background:#e8def8;color:#6940a5',
+            '工具': 'background:#d3e5ef;color:#2f7da0',
+            '其他': 'background:#f1f0ef;color:#787774',
+        };
+
         matchedLinks.forEach(function(link) {
             const realIndex = links.indexOf(link);
             const isSelected = window.Selection && Selection.selected.has(realIndex);
-            const tagHTML = link.tag ? `<span class="card-tag">🏷️ ${link.tag}</span>` : '';
+            
+            // 获取用户自定义标签颜色
+            const customColors = window.getTagColors ? window.getTagColors() : {};
+            // 渲染所有标签（支持多标签）
+            const linkTags = getLinkTags(link);
+            const tagHTML = linkTags.map(function(t) {
+                let style;
+                if (customColors[t]) {
+                    style = `background:${customColors[t].bg};color:${customColors[t].text}`;
+                } else {
+                    style = tagColorMap[t] || 'background:#f1f0ef;color:#787774';
+                }
+                return `<span class="card-tag" style="${style}">${t}</span>`;
+            }).join(' ');
+            
             const title = escapeHTML(link.title);
             const url = escapeHTML(link.url);
             const note = escapeHTML(link.note);

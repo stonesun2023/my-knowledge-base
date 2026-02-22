@@ -1718,6 +1718,12 @@
                     <button class="tag-btn" data-tag="工作">工作</button>
                     <button class="tag-btn" data-tag="工具">工具</button>
                     <button class="tag-btn" data-tag="其他">其他</button>
+                    <!-- 自定义标签入口 -->
+                    <button class="tag-btn add-custom-tag-btn" id="addCustomTagBtn" type="button">＋ 自定义</button>
+                    <span class="custom-tag-input-wrap" id="customTagInputWrap" style="display:none">
+                        <input type="text" id="customTagInput" placeholder="输入标签名" maxlength="10" style="width:80px;padding:5px 8px;font-size:13px;margin:0;">
+                        <button id="customTagConfirmBtn" style="padding:5px 8px;font-size:13px;margin-left:4px;">✓</button>
+                    </span>
                 </div>
             </div>
 
@@ -1939,17 +1945,20 @@
         const AppState = (function() {
             const STORAGE_KEY_LINKS  = 'superBrain_links';
             const STORAGE_KEY_THEME  = 'superBrain_darkMode';
+            const STORAGE_KEY_CUSTOM_TAGS = 'superBrain_customTags';
             const HISTORY_MAX        = 10;   // 最多保留 10 条历史
             const PERSIST_THROTTLE   = 500;  // 节流保存 ms
 
             // ---------- 初始数据 ----------
             const _initLinks = JSON.parse(localStorage.getItem(STORAGE_KEY_LINKS) || '[]');
             const _initTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'light';
+            const _initCustomTags = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_TAGS) || '[]');
 
             // ---------- 核心状态树 ----------
             let _state = {
                 data: {
                     links: _initLinks,
+                    customTags: _initCustomTags,
                 },
                 filters: {
                     tag: '全部',
@@ -1980,6 +1989,7 @@
             function _persist() {
                 localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(_state.data.links));
                 localStorage.setItem(STORAGE_KEY_THEME, _state.ui.theme);
+                localStorage.setItem(STORAGE_KEY_CUSTOM_TAGS, JSON.stringify(_state.data.customTags || []));
             }
 
             // ---------- 深路径读取 ----------
@@ -2383,6 +2393,115 @@
                 // 不再操作 AppState.selectedAddTag（单值），改用读取所有选中按钮
             };
         });
+
+        // ==========================================
+        // 自定义标签功能
+        // ==========================================
+        const addCustomTagBtn = document.getElementById('addCustomTagBtn');
+        const customTagInputWrap = document.getElementById('customTagInputWrap');
+        const customTagInput = document.getElementById('customTagInput');
+        const customTagConfirmBtn = document.getElementById('customTagConfirmBtn');
+        const addTagButtonsContainer = document.getElementById('addTagButtons');
+
+        // 点击"＋ 自定义"按钮，显示输入框
+        addCustomTagBtn.onclick = function() {
+            this.style.display = 'none';
+            customTagInputWrap.style.display = 'inline-flex';
+            customTagInput.focus();
+        };
+
+        // 确认添加自定义标签
+        function confirmAddCustomTag() {
+            const tagName = customTagInput.value.trim();
+            if (!tagName) {
+                customTagInput.focus();
+                return;
+            }
+
+            // 检查是否已存在（预设标签或自定义标签）
+            const existingTags = Array.from(addTagButtonsContainer.querySelectorAll('.tag-btn[data-tag]'))
+                .map(btn => btn.dataset.tag);
+            
+            if (existingTags.includes(tagName)) {
+                alert(`标签「${tagName}」已存在！`);
+                customTagInput.value = '';
+                customTagInput.focus();
+                return;
+            }
+
+            // 创建新标签按钮
+            const newTagBtn = document.createElement('button');
+            newTagBtn.className = 'tag-btn';
+            newTagBtn.dataset.tag = tagName;
+            newTagBtn.textContent = tagName;
+            newTagBtn.onclick = function() {
+                this.classList.toggle('selected');
+            };
+
+            // 插入到"＋ 自定义"按钮之前
+            addTagButtonsContainer.insertBefore(newTagBtn, addCustomTagBtn);
+
+            // 自动选中新标签
+            newTagBtn.classList.add('selected');
+
+            // 保存到 AppState
+            const customTags = AppState.get('data.customTags') || [];
+            if (!customTags.includes(tagName)) {
+                customTags.push(tagName);
+                AppState.set('data.customTags', customTags, { persist: true, action: 'addCustomTag' });
+            }
+
+            // 重置输入框
+            customTagInput.value = '';
+            customTagInputWrap.style.display = 'none';
+            addCustomTagBtn.style.display = 'inline-block';
+
+            console.log(`[CustomTag] ✅ 已添加自定义标签: ${tagName}`);
+        }
+
+        // 确认按钮点击
+        customTagConfirmBtn.onclick = confirmAddCustomTag;
+
+        // 回车确认
+        customTagInput.onkeydown = function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmAddCustomTag();
+            } else if (e.key === 'Escape') {
+                // ESC 取消
+                customTagInput.value = '';
+                customTagInputWrap.style.display = 'none';
+                addCustomTagBtn.style.display = 'inline-block';
+            }
+        };
+
+        // 初始化：恢复已保存的自定义标签
+        function restoreCustomTags() {
+            const customTags = AppState.get('data.customTags') || [];
+            customTags.forEach(function(tagName) {
+                // 检查是否已存在（防止重复）
+                const existingTags = Array.from(addTagButtonsContainer.querySelectorAll('.tag-btn[data-tag]'))
+                    .map(btn => btn.dataset.tag);
+                
+                if (existingTags.includes(tagName)) return;
+
+                // 创建标签按钮
+                const newTagBtn = document.createElement('button');
+                newTagBtn.className = 'tag-btn';
+                newTagBtn.dataset.tag = tagName;
+                newTagBtn.textContent = tagName;
+                newTagBtn.onclick = function() {
+                    this.classList.toggle('selected');
+                };
+
+                // 插入到"＋ 自定义"按钮之前
+                addTagButtonsContainer.insertBefore(newTagBtn, addCustomTagBtn);
+            });
+            console.log(`[CustomTag] ✅ 已恢复 ${customTags.length} 个自定义标签`);
+        }
+
+        // 页面加载后恢复自定义标签
+        restoreCustomTags();
 
         // ==========================================
         // 保存链接（通过 AppState）- 支持多标签

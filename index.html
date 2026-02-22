@@ -90,6 +90,18 @@
             --highlight-bg: #4a4a2a;
         }
 
+        /* 深色模式下选中标签可读性 */
+        body.dark-mode .tag-btn.selected {
+            background-color: var(--bg-tertiary, #3a3a3a);
+            color: var(--text-primary);
+            border-color: var(--accent-color);
+        }
+
+        body.dark-mode .tag-btn.selected:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
         /* ==========================================
            基础样式
         ========================================== */

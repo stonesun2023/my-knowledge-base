@@ -2349,10 +2349,21 @@
         });
 
         // P2: 触发 AI 标签建议
+        let _tagSuggestionRetryCount = 0;
         function triggerAITagSuggestion(url, title, description) {
             // 通过 appModule 暴露的 tagSuggesterUI 实例调用
             const suggesterUI = window.appModule?.tagSuggesterUI;
-            if (suggesterUI && typeof suggesterUI.triggerFromFormData === 'function') {
+            if (!suggesterUI) {
+                // appModule 未就绪，延迟100ms重试一次（最多重试一次）
+                if (_tagSuggestionRetryCount < 1) {
+                    _tagSuggestionRetryCount++;
+                    setTimeout(() => triggerAITagSuggestion(url, title, description), 100);
+                }
+                return;
+            }
+            // 重置重试计数
+            _tagSuggestionRetryCount = 0;
+            if (typeof suggesterUI.triggerFromFormData === 'function') {
                 suggesterUI.triggerFromFormData(url, title, description);
             }
         }

@@ -357,15 +357,24 @@ class TagSuggesterUI {
             suggestionArea.querySelectorAll('.form-tag-suggestion-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tag = btn.dataset.tag;
-                    this._selectFormTag(tag);
+                    const matched = this._selectFormTag(tag);
                     
-                    // 更新按钮样式为已选中
-                    suggestionArea.querySelectorAll('.form-tag-suggestion-btn').forEach(b => {
-                        b.style.background = 'transparent';
-                        b.style.color = 'var(--accent-color)';
-                    });
-                    btn.style.background = 'var(--accent-color)';
-                    btn.style.color = '#fff';
+                    if (matched) {
+                        // 匹配成功：更新按钮样式为已选中
+                        suggestionArea.querySelectorAll('.form-tag-suggestion-btn').forEach(b => {
+                            b.style.background = 'transparent';
+                            b.style.color = 'var(--accent-color)';
+                            b.style.borderColor = 'var(--accent-color)';
+                            b.title = '';
+                        });
+                        btn.style.background = 'var(--accent-color)';
+                        btn.style.color = '#fff';
+                    } else {
+                        // 标签不在预设列表，用样式提示用户
+                        btn.title = '该标签不在预设列表中，请手动选择';
+                        btn.style.borderColor = 'var(--text-secondary)';
+                        btn.style.color = 'var(--text-secondary)';
+                    }
                 });
             });
 
@@ -381,16 +390,20 @@ class TagSuggesterUI {
     /**
      * 选中表单区的标签按钮
      * @param {string} tag
+     * @returns {boolean} 是否匹配成功
      */
     _selectFormTag(tag) {
         // 找到对应标签的按钮并触发点击
         const tagButtons = document.querySelectorAll('#addTagButtons .tag-btn');
+        let matched = false;
         tagButtons.forEach(btn => {
             const btnTag = btn.dataset.tag;
             if (btnTag === tag && !btn.classList.contains('selected')) {
                 btn.click();
+                matched = true;
             }
         });
+        return matched;
     }
 
     /**
